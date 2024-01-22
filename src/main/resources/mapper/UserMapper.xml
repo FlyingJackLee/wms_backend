@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lizumin.wms.dao.UserMapper">
+    <select id="getUsernameByEmail" resultType="string">
+        SELECT t1.username FROM users t1 INNER JOIN users_detail t2 ON t1.id = t2.user_id WHERE t2.email = #{email};
+    </select>
+
+    <select id="getUsernameByPhoneNumber" resultType="string">
+        SELECT t1.username FROM users t1 INNER JOIN users_detail t2 ON t1.id = t2.user_id WHERE t2.phone_number = #{phone_number};
+    </select>
+
+    <select id="getUserByUsername" resultMap="userDetail">
+        SELECT t1.id, t1.username, t1.password, t1.enabled, t1.accountnonexpired, t1.credentialsnonexpired, t1.accountnonlocked, t2.authority
+        FROM users t1 LEFT JOIN authorities t2 ON t1.id = t2.user_id
+        WHERE t1.username = #{username};
+    </select>
+    <resultMap id="userDetail" type="com.lizumin.wms.entity.User">
+        <id property="id" column="id" />
+        <result property="username" column="username" />
+        <result property="password" column="password" />
+        <result property="enabled" column="enabled" />
+        <result property="accountNonExpired" column="accountnonexpired" />
+        <result property="credentialsNonExpired" column="credentialsnonexpired" />
+        <result property="accountNonLocked" column="accountnonlocked" />
+        <collection property="authorities" column="user_id" ofType="com.lizumin.wms.entity.SimpleAuthority">
+            <result property="authority" column="authority" />
+        </collection>
+    </resultMap>
+
+    <select id="isUsernameExist" resultType="boolean">
+        SELECT EXISTS(SELECT username FROM users WHERE username = #{username}) AS RESULT;
+    </select>
+
+    <select id="isPhoneExist" resultType="boolean">
+        SELECT EXISTS(Select phone_number from users_detail where phone_number = #{phone}) AS RESULT;
+    </select>
+
+    <select id="isEmailExist" resultType="boolean">
+        SELECT EXISTS(Select email from users_detail where email = #{email}) AS RESULT;
+    </select>
+    
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id" parameterType="com.lizumin.wms.entity.User">
+        INSERT INTO users(username, password, enabled, accountnonexpired, accountnonlocked, credentialsnonexpired)
+                        values (#{username}, #{password}, #{enabled}, #{accountNonExpired}, #{accountNonLocked}, #{credentialsNonExpired});
+    </insert>
+
+    <insert id="insertAuthority">
+        INSERT INTO authorities(user_id, authority) values (#{user_id}, #{authority});
+    </insert>
+
+    <insert id="updateEmail">
+        UPDATE users_detail SET email=#{email} where user_id = #{user_id};
+        INSERT INTO users_detail(user_id, email) SELECT #{user_id}, #{email} WHERE NOT EXISTS (SELECT 1 FROM users_detail WHERE user_id = #{user_id});
+    </insert>
+
+    <insert id="updatePhone">
+        UPDATE users_detail SET phone_number=#{phone} where user_id = #{user_id};
+        INSERT INTO users_detail(user_id, phone_number) SELECT #{user_id}, #{phone} WHERE NOT EXISTS (SELECT 1 FROM users_detail WHERE user_id = #{user_id});
+    </insert>
+</mapper>
