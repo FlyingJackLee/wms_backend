@@ -23,11 +23,9 @@ public class UserController {
     public final static String EMAIL_VERIFY_CODE_PREFIX = "email_verify_code_";
     private final static int EMAIL_VERIFY_CODE_DURATION = 15;
     private final static int VERIFY_CODE_LENGTH = 6;
-
     private MailService mailService;
     private RedisOperatorImpl redisOperator;
     private UserService userService;
-
 
     public UserController(MailService mailService, RedisOperatorImpl redisOperator, UserService userService) {
         this.mailService = mailService;
@@ -67,7 +65,6 @@ public class UserController {
         return ResponseEntity.ok().body(this.userService.isEmailExist(email));
     }
 
-
     /**
      * 发送随机验证邮件（15分钟）
      *
@@ -86,6 +83,39 @@ public class UserController {
         Locale locale = LocaleContextHolder.getLocale();
         this.mailService.sendVerifyCode(email, code, locale);
 
+        return ResponseEntity.ok ("success");
+    }
+
+    /**
+     * 通过邮件修改密码
+     *
+     * @param email 发送地址
+     *        code  邮件验证码（通过sendEmailVerifyCode发送）
+     * @return
+     */
+    @PostMapping("/reset/email")
+    public ResponseEntity<String> resetPasswordByEmail(@RequestParam("email") String email,
+                                                       @RequestParam("password") String password,
+                                                        @RequestParam("code") String code) {
+        if (!Verify.verifyEmail(email)) {
+            return ResponseEntity.badRequest().body(MessageUtil.getMessageByContext("BPV-008"));
+        }
+        if (!Verify.verifyPassword(password)) {
+            return ResponseEntity.badRequest().body(MessageUtil.getMessageByContext("BPV-010"));
+        }
+
+        // 邮箱不存在时停止
+        if (!userService.isEmailExist(email)) {
+            return ResponseEntity.badRequest().body(MessageUtil.getMessageByContext("BPV-015"));
+        }
+
+        // 验证码不存在时不允许验证
+        String verifyCode = redisOperator.get(UserController.EMAIL_VERIFY_CODE_PREFIX + email);
+        if (verifyCode == null || !verifyCode.equals(code)) {
+            return ResponseEntity.badRequest().body(MessageUtil.getMessageByContext("BPV-012"));
+        }
+
+        this.userService.resetPassword(email, password);
         return ResponseEntity.ok ("success");
     }
 

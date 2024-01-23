@@ -60,4 +60,9 @@
         UPDATE users_detail SET phone_number=#{phone} where user_id = #{user_id};
         INSERT INTO users_detail(user_id, phone_number) SELECT #{user_id}, #{phone} WHERE NOT EXISTS (SELECT 1 FROM users_detail WHERE user_id = #{user_id});
     </insert>
+
+    <update id="updatePasswordByEmail">
+        UPDATE users SET password=#{password} WHERE id =
+        (SELECT user_id FROM users_detail WHERE email = #{email});
+    </update>
 </mapper>

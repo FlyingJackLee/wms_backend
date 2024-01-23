@@ -6,9 +6,10 @@ import com.lizumin.wms.dao.UserMapper;
 
 import com.lizumin.wms.exception.UserNotFoundException;
 import com.lizumin.wms.tool.Verify;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.userdetails.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +18,12 @@ public class UserService implements UserDetailsService {
     private final UserMapper userMapper;
     private final UserCache userCache;
 
-    @Autowired
-    public UserService(UserMapper userMapper, UserCache userCache) {
+    private PasswordEncoder passwordEncoder;
+
+    public UserService(UserMapper userMapper, UserCache userCache, PasswordEncoder passwordEncoder) {
         this.userMapper = userMapper;
         this.userCache = userCache;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -45,7 +48,7 @@ public class UserService implements UserDetailsService {
     /**
      * Get user from cache or database.
      *
-     * @param username
+     * @param username: not null or empty
      * @return
      */
     public User lazyLoadUserByUsername(String username) {
@@ -61,7 +64,7 @@ public class UserService implements UserDetailsService {
     /**
      * Get username by email
      *
-     * @param email
+     * @param email: not null or empty
      * @return
      */
     public String getUsernameByEmail(String email) {
@@ -71,7 +74,7 @@ public class UserService implements UserDetailsService {
     /**
      * Get username by phone number
      *
-     * @param phoneNumber
+     * @param phoneNumber: not null or empty
      * @return
      */
     public String getUsernameByPhoneNumber(String phoneNumber) {
@@ -102,7 +105,7 @@ public class UserService implements UserDetailsService {
      * Check if email has been used
      *
      * @param email: not null and legal
-     * @return  true: email exist vice versa
+     * @return true: email exist vice versa
      */
     public boolean isEmailExist(String email) {
         return this.userMapper.isEmailExist(email);
@@ -111,10 +114,9 @@ public class UserService implements UserDetailsService {
     /**
      * 插入user并返回id
      *
-     * @param user
+     * @param user not null or empty
      * @return
      */
-
     @Transactional
     public int insertUser(User user) {
         this.userMapper.insertUser(user);
@@ -126,6 +128,14 @@ public class UserService implements UserDetailsService {
         return user.getId();
     }
 
+    /**
+     * 插入user及其邮箱手机
+     *
+     * @param user not null or empty
+     * @param email not null or empty
+     * @param phone not null or empty
+     * @return
+     */
     @Transactional
     public int insertUser(User user, @Nullable String email, @Nullable String phone) {
         int id = insertUser(user);
@@ -136,5 +146,23 @@ public class UserService implements UserDetailsService {
             userMapper.updatePhone(id, phone);
         }
         return id;
+    }
+
+    /**
+     * 根据邮箱重置密码
+     *
+     * @param email not null or empty
+     * @param password not null or empty
+     * @return
+     */
+    public boolean resetPassword(@NonNull String email, @Nullable String password) {
+        // 加密密钥
+        String encryptedPassword = passwordEncoder.encode(password);
+        try {
+            this.userMapper.updatePasswordByEmail(email, encryptedPassword);
+        } catch (Exception e){
+            return false;
+        }
+        return true;
     }
 }

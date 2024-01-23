@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserCache;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +27,8 @@ public class UserServiceTest {
 
     private UserService userService;
 
+    private PasswordEncoder passwordEncoder;
+
     public UserServiceTest() {
         userMapper = Mockito.mock(UserMapper.class);
         when(userMapper.getUserByUsername(null)).thenReturn(null);
@@ -37,7 +40,9 @@ public class UserServiceTest {
         when(userCache.getUserFromCache("")).thenReturn(null);
         when(userCache.getUserFromCache("not_exist")).thenReturn(null);
 
-        userService = new UserService(userMapper, userCache);
+        passwordEncoder = Mockito.mock(PasswordEncoder.class);
+
+        userService = new UserService(userMapper, userCache, passwordEncoder);
     }
 
     /**
@@ -179,5 +184,16 @@ public class UserServiceTest {
         verify(userMapper).updateEmail(5, "a2@a.com");
         verify(userMapper).updatePhone(5, "13112341234");
         assertThat(result, is(5));
+    }
+
+    /**
+     * 通过邮箱重置密码测试
+     */
+    @Test
+    public void should_set_encrypted_password_when_reset_by_email() {
+        when(passwordEncoder.encode("test000")).thenReturn("encryted");
+        userService.resetPassword("test@test.com", "test000");
+        verify(passwordEncoder).encode("test000");
+        verify(userMapper).updatePasswordByEmail("test@test.com", "encryted");
     }
 }

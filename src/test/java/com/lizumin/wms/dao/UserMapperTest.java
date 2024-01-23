@@ -212,7 +212,7 @@ public class UserMapperTest {
      *
      */
     @Test
-    public void should_throw_exception_when_detail_invlid() {
+    public void should_throw_exception_when_detail_invalid() {
         // 1. 字段错误
         User user = new User.Builder().username("detailtest2").password("test1234").build();
         this.userMapper.insertUser(user);
@@ -222,5 +222,20 @@ public class UserMapperTest {
         // 2. 已经存在
         Assertions.assertThrows(DuplicateKeyException.class,() -> {this.userMapper.updatePhone(user.getId(), "13012341234");});
         Assertions.assertThrows(DuplicateKeyException.class,() -> {this.userMapper.updateEmail(user.getId(), "test@test.com");});
+    }
+
+    /**
+     * 修改密码测试
+     *
+     */
+    @Test
+    public void should_update_password_when_giving_a_valid_email_and_password() {
+        User user = new User.Builder().username("passwordresettest").password("test1234").build();
+        this.userMapper.insertUser(user);
+        this.userMapper.updateEmail(user.getId(), "passwordresettest@test.com");
+        this.userMapper.updatePasswordByEmail("passwordresettest@test.com", "resettest123");
+
+        User modifedUser = this.userMapper.getUserByUsername(user.getUsername());
+        assertThat(modifedUser.getPassword(), equalTo("resettest123"));
     }
 }

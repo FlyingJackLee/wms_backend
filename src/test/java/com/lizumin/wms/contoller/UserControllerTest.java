@@ -1,5 +1,6 @@
 package com.lizumin.wms.contoller;
 
+import com.lizumin.wms.controller.UserController;
 import com.lizumin.wms.dao.RedisOperator;
 import com.lizumin.wms.service.MailService;
 import org.junit.jupiter.api.BeforeEach;
@@ -137,6 +138,49 @@ public class UserControllerTest {
         assertThat(expire, notNullValue());
         long diff = expire.getTime() - System.currentTimeMillis();
         assertThat(diff < 1000, is(true));
+    }
+
+    /**
+     * 参数不正确时，邮件重置密码验证测试
+     *
+     */
+    @Test
+    public void should_send_bad_request_when_reset_password_with_email_giving_illegal_parameter() throws Exception {
+        // 1. 参数为空
+        this.mvc.perform(MockMvcRequestBuilders.post("/user/reset/email").queryParams(parameters))
+                .andExpect(status().isBadRequest());
+
+        // 2. 参数不合法
+        parameters.set("email", "notaemail");
+        parameters.set("password", "a1");
+        parameters.set("code", "a1234");
+        this.mvc.perform(MockMvcRequestBuilders.post("/user/reset/email").queryParams(parameters))
+                .andExpect(status().isBadRequest()).andExpect(content().string(equalTo("邮箱格式不正确")));
+
+        parameters.set("email", "testresetemail@test.com");
+        this.mvc.perform(MockMvcRequestBuilders.post("/user/reset/email").queryParams(parameters))
+                .andExpect(status().isBadRequest()).andExpect(content().string(equalTo("密码格式不正确(长度必须大于8小于16)")));
+
+        // 3. code不存在cache
+        parameters.set("email", "test@test.com");
+        parameters.set("password", "a123456789");
+        this.mvc.perform(MockMvcRequestBuilders.post("/user/reset/email").queryParams(parameters))
+                .andExpect(status().isBadRequest()).andExpect(content().string(equalTo("邮件验证码无效")));
+    }
+
+    /**
+     * 邮件重置密码验证测试
+     *
+     */
+    @Test
+    public void should_set_encrypted_password_when_reset_password_with_email() throws Exception {
+        parameters.set("email", "testmodified@test.com");
+        parameters.set("password", "a123456789");
+        parameters.set("code", "a12345");
+        redisOperator.set(UserController.EMAIL_VERIFY_CODE_PREFIX + "testmodified@test.com", "a12345");
+
+        this.mvc.perform(MockMvcRequestBuilders.post("/user/reset/email").queryParams(parameters))
+                .andExpect(status().is2xxSuccessful()).andExpect(content().string(equalTo("success")));
     }
 
     // 修改请求ip

@@ -24,4 +24,7 @@ public interface UserMapper {
 
     // phone must be a valid email
     void updatePhone(@Param("user_id") int user_id, @Param("phone") String phone) throws DuplicateKeyException, DataIntegrityViolationException;;
+
+    // password must be encrypted!
+    void updatePasswordByEmail(@Param("email") String email, @Param("password") String password);
 }
