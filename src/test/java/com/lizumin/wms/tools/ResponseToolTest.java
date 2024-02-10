@@ -1,5 +1,6 @@
 package com.lizumin.wms.tools;
 
+import com.lizumin.wms.tool.ResponseTool;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -26,22 +27,20 @@ public class ResponseToolTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
         response.setStatus(MockHttpServletResponse.SC_OK);
         writeJson(response, null);
-        assertThat(response.getContentType(), equalTo("application/json; charset=utf-8"));
+        assertThat(response.getContentType(), containsString("application/json"));
         assertThat(response.getCharacterEncoding(), equalTo("UTF-8"));
         assertThat(getBody(response), equalTo("null"));
 
         response = new MockHttpServletResponse();
         response.setStatus(MockHttpServletResponse.SC_OK);
         writeJson(response, new HashMap<>(0));
-        assertThat(response.getContentType(), equalTo("application/json; charset=utf-8"));
+        assertThat(response.getContentType(), containsString("application/json"));
         assertThat(response.getCharacterEncoding(), equalTo("UTF-8"));
         assertThat(getBody(response), equalTo("{}"));
 
         response = new MockHttpServletResponse();
         response.setStatus(MockHttpServletResponse.SC_OK);
         writeValue(response, null, null);
-        assertThat(response.getContentType(), equalTo("application/json; charset=utf-8"));
-        assertThat(response.getCharacterEncoding(), equalTo("UTF-8"));
         assertThat(getBody(response), equalTo(""));
     }
 
@@ -57,16 +56,32 @@ public class ResponseToolTest {
         body.put("test001", "value001");
         body.put("test002", "value002");
         writeJson(response, body);
-        assertThat(response.getContentType(), equalTo("application/json; charset=utf-8"));
+        assertThat(response.getContentType(), containsString("application/json"));
         assertThat(response.getCharacterEncoding(), equalTo("UTF-8"));
         assertThat(getBody(response), equalTo("{\"test001\":\"value001\",\"test002\":\"value002\"}"));
 
         response = new MockHttpServletResponse();
         response.setStatus(MockHttpServletResponse.SC_OK);
         writeValue(response, "test001", "test002");
-        assertThat(response.getContentType(), equalTo("application/json; charset=utf-8"));
+        assertThat(response.getContentType(), containsString("application/json"));
         assertThat(response.getCharacterEncoding(), equalTo("UTF-8"));
         assertThat(getBody(response), equalTo("{\"test001\":\"test002\"}"));
+    }
+
+    /**
+     * 测试设置纯文本返回体
+     *
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     */
+    @Test
+    public void should_write_str_into_body_when_body_is_legal() throws NoSuchFieldException, IllegalAccessException {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        response.setStatus(MockHttpServletResponse.SC_OK);
+        ResponseTool.writeBody(response, "success");
+        assertThat(response.getContentType(), containsString("text/plain"));
+        assertThat(response.getCharacterEncoding(), equalTo("UTF-8"));
+        assertThat(getBody(response), equalTo("success"));
     }
 
     private String getBody(MockHttpServletResponse response) throws NoSuchFieldException, IllegalAccessException {

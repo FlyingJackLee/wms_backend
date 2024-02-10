@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Locale;
 
@@ -177,7 +178,7 @@ public class UserControllerTest {
         parameters.set("email", "testmodified@test.com");
         parameters.set("password", "a123456789");
         parameters.set("code", "a12345");
-        redisOperator.set(UserController.EMAIL_VERIFY_CODE_PREFIX + "testmodified@test.com", "a12345");
+        redisOperator.set(UserController.EMAIL_VERIFY_CODE_PREFIX + "testmodified@test.com", "a12345", Duration.ofSeconds(30));
 
         this.mvc.perform(MockMvcRequestBuilders.post("/user/reset/email").queryParams(parameters))
                 .andExpect(status().is2xxSuccessful()).andExpect(content().string(equalTo("success")));

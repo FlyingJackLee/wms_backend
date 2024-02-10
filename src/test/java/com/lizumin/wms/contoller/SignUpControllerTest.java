@@ -15,6 +15,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import java.time.Duration;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -130,7 +133,7 @@ public class SignUpControllerTest {
                 .isBadRequest()).andExpect(content().string(containsString("Invalid email verify code")));
 
         //5. 传入code与cache code不一致
-        redisOperator.set(UserController.EMAIL_VERIFY_CODE_PREFIX + "testemailcode@test.com" ,"a123c5");
+        redisOperator.set(UserController.EMAIL_VERIFY_CODE_PREFIX + "testemailcode@test.com" ,"a123c5", Duration.ofSeconds(30));
         this.mvc.perform(makeRequest("/signup/email", "email", "bademailtest@test.com", "password","abcd1234", "code", "a01234"))
                 .andExpect(status().isBadRequest()).andExpect(content().string(containsString("邮件验证码无效")));
         this.mvc.perform(makeRequest("/signup/email", "email", "bademailtest@test.com", "password","abcd1234", "code", "a01234")
@@ -138,7 +141,7 @@ public class SignUpControllerTest {
                 .andExpect(status().isBadRequest()).andExpect(content().string(containsString("Invalid email verify code")));
 
         //6. 邮箱被使用时
-        redisOperator.set(UserController.EMAIL_VERIFY_CODE_PREFIX + "test@test.com" ,"a123c5");
+        redisOperator.set(UserController.EMAIL_VERIFY_CODE_PREFIX + "test@test.com" ,"a123c5", Duration.ofSeconds(30));
         this.mvc.perform(makeRequest("/signup/email", "email", "test@test.com", "password","abcd1234", "code", "a123c5"))
                 .andExpect(status().isBadRequest()).andExpect(content().string(containsString("邮件已使用")));
         this.mvc.perform(makeRequest("/signup/email", "email", "test@test.com", "password","abcd1234", "code", "a123c5")
@@ -153,7 +156,7 @@ public class SignUpControllerTest {
      */
     @Test
     public void should_insert_user_when_input_valid_username_code_password() throws Exception {
-        redisOperator.set(UserController.EMAIL_VERIFY_CODE_PREFIX + "emailsignupsuccess@test.com" ,"a12345");
+        redisOperator.set(UserController.EMAIL_VERIFY_CODE_PREFIX + "emailsignupsuccess@test.com" ,"a12345", Duration.ofSeconds(30));
         this.mvc.perform(makeRequest("/signup/email", "email", "emailsignupsuccess@test.com", "password","abcd1234", "code", "a12345"))
                 .andExpect(status().is2xxSuccessful());
 

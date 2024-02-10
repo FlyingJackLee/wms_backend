@@ -54,13 +54,12 @@ public class SignUpController {
         User userAdd = new User(username, this.passwordEncode.encode(password));
         userAdd.setAuthorities(defaultAuthority());
 
-        int id;
         try {
-            id = this.userService.insertUser(userAdd);
+            this.userService.insertUser(userAdd);
         } catch (DuplicateKeyException e){
             return ResponseEntity.badRequest().body(MessageUtil.getMessageByContext("BPV-011"));
         }
-        return ResponseEntity.ok(String.valueOf(id));
+        return ResponseEntity.ok("success");
     }
 
     /**
@@ -96,15 +95,14 @@ public class SignUpController {
         String username = generateUniqueUsername();
         User userAdd = new User(username, this.passwordEncode.encode(password));
         userAdd.setAuthorities(defaultAuthority());
-        int id;
         try {
-            id = this.userService.insertUser(userAdd, email, null);
+            this.userService.insertUser(userAdd, email, null);
         } catch (DuplicateKeyException e){
             // 极低概率
             return ResponseEntity.internalServerError().body(MessageUtil.getMessageByContext("BSA-014"));
         }
 
-        return ResponseEntity.ok(String.valueOf(id));
+        return ResponseEntity.ok("success");
     }
 
     /**
