@@ -53,10 +53,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throw new AuthenticationUserException("BPV-005");
         }
         Optional<String> username = claims.get().getPayload().getAudience().stream().findFirst();
-        if (username.isEmpty()) {
+        long id = (int) claims.get().getPayload().get("id");
+        if ( username.isEmpty() || id < 1) {
             throw new AuthenticationUserException("BPV-006");
         }
 
+        // 包装进principal的是User
         User user =  this.userService.lazyLoadUserByUsername(username.get());
         UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken
                 .authenticated(user, null, user.getAuthorities());

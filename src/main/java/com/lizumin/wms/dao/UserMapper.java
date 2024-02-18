@@ -8,7 +8,6 @@ import org.springframework.dao.DuplicateKeyException;
 
 @Mapper
 public interface UserMapper {
-
     User getUserByUsername(@Param("username") String username);
     String getUsernameByEmail(@Param("email") String email);
     String getUsernameByPhoneNumber(@Param("phone_number") String phoneNumber);
@@ -20,10 +19,10 @@ public interface UserMapper {
     void insertAuthority(@Param("user_id") int user_id, @Param("authority") String authority);
 
     // insert OR !UPDATE! email must be a valid email
-    void updateEmail(@Param("user_id") int user_id, @Param("email") String email) throws DuplicateKeyException, DataIntegrityViolationException;;
+    void updateEmail(@Param("user_id") int user_id, @Param("email") String email) throws DuplicateKeyException, DataIntegrityViolationException;
 
     // phone must be a valid email
-    void updatePhone(@Param("user_id") int user_id, @Param("phone") String phone) throws DuplicateKeyException, DataIntegrityViolationException;;
+    void updatePhone(@Param("user_id") int user_id, @Param("phone") String phone) throws DuplicateKeyException, DataIntegrityViolationException;
 
     // password must be encrypted!
     void updatePasswordByEmail(@Param("email") String email, @Param("password") String password);

@@ -111,7 +111,7 @@ public class SecurityConfig {
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder,
             UserCache userCache) {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        UserAuthenticationProvider authenticationProvider = new UserAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder);
         authenticationProvider.setUserCache(userCache);

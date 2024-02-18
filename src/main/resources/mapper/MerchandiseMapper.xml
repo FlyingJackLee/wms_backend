@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lizumin.wms.dao.MerchandiseMapper">
+    <select id="getMerchandiseCount">
+        SELECT count(*) FROM merchandise WHERE own_id = #{owner_id} AND sold = #{sold};
+    </select>
+
+    <select id="getMerchandiseById" resultMap="merchandise">
+        SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
+        FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
+        WHERE M.me_id = #{me_id} AND M.own_id = #{owner_id};
+    </select>
+
+    <select id="getAllMerchandise" resultMap="merchandise">
+        SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
+        FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
+        WHERE M.own_id = #{owner_id}
+        LIMIT #{limit} OFFSET #{offset};
+    </select>
+
+    <select id="getAllMerchandiseBySold" resultMap="merchandise">
+        SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
+        FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
+        WHERE M.own_id = #{owner_id} AND M.sold = #{sold}
+        LIMIT #{limit} OFFSET #{offset};
+    </select>
+
+    <select id="getMerchandiseByImei" resultMap="merchandise">
+        SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
+        FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
+        WHERE M.imei = #{imei} AND M.own_id = #{owner_id};
+    </select>
+
+    <select id="getMerchandiseByCateID" resultMap="merchandise">
+        SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
+        FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
+        WHERE M.cate_id = #{cate_id} AND M.own_id = #{owner_id};
+    </select>
+
+    <select id="insertMerchandise">
+        INSERT INTO merchandise(cate_id, cost, price, imei, create_time, own_id)
+        values (#{cate_id}, #{cost}, #{price}, #{imei}, #{create_time}, #{owner_id})
+        RETURNING me_id;;
+    </select>
+
+    <update id="updateSold">
+        UPDATE merchandise SET sold = #{sold} WHERE me_id = #{me_id} AND own_id = #{owner_id};
+    </update>
+
+    <resultMap id="merchandise" type="com.lizumin.wms.entity.Merchandise">
+        <id property="id" column="me_id" />
+        <result property="cost" column="cost" />
+        <result property="price" column="price" />
+        <result property="imei" column="imei" />
+        <result property="createTime" column="create_time" />
+        <result property="sold" column="sold" />
+        <association property="category" javaType="com.lizumin.wms.entity.Category">
+            <result property="id" column="cate_id"/>
+            <result property="parentId" column="parent_cate_id"/>
+            <result property="name" column="name"/>
+        </association>
+    </resultMap>
+</mapper>

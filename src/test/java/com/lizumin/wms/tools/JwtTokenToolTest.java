@@ -10,8 +10,6 @@ import java.lang.reflect.Field;
 import java.security.*;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
@@ -27,7 +25,6 @@ import static com.lizumin.wms.tool.JwtTokenTool.verifyAndGetClaims;
 public class JwtTokenToolTest {
     private static PrivateKey privateKey;
     private static PublicKey publicKey;
-    private String testAudience = "test";
 
     @BeforeAll
     public static void setUp() throws NoSuchFieldException, IllegalAccessException {
@@ -65,18 +62,20 @@ public class JwtTokenToolTest {
      */
     @Test
     public void should_jwt_with_audience_when_generate_token_with_or_without_expire() {
-        String token = generateToken(testAudience);
+        String token = generateToken("test001", 1);
         Optional<Jws<Claims>> claimsJws = verifyAndGetClaims(token);
 
         assertThat(claimsJws.isEmpty(),is(false));
-        assertThat(claimsJws.get().getPayload().getAudience(), hasItem(testAudience));
+        assertThat(claimsJws.get().getPayload().get("id"), is(1));
+        assertThat(claimsJws.get().getPayload().getAudience(), hasItem("test001"));
+
         Date tokenDate = claimsJws.get().getPayload().getExpiration();
         assertThat(diffMill(new Date(), tokenDate), equalTo(23L));
 
         Calendar calendar = Calendar.getInstance();
         // 默认有效期
         calendar.add(Calendar.HOUR_OF_DAY, 72);
-        token = generateToken(testAudience, calendar.getTime());
+        token = generateToken("test001", 1, calendar.getTime());
         claimsJws = verifyAndGetClaims(token);
         tokenDate = claimsJws.get().getPayload().getExpiration();
         assertThat(diffMill(new Date(), tokenDate), equalTo(71L));
