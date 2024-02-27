@@ -38,7 +38,7 @@ public class CategoryServiceTest {
     @Test
     public void should_throw_runtime_exception_when_parent_id_illegal() {
         Assertions.assertThrows(IllegalArgumentException.class, () ->{
-            categoryService.getCategoriesByParentId(0);
+            categoryService.getCategoriesByParentId(-1);
         });
     }
 

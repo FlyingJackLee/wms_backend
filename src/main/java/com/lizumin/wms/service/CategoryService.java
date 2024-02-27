@@ -31,6 +31,11 @@ public class CategoryService {
         return this.categoryMapper.getCategoriesByParentId(0);
     }
 
+    public Category getCategory(int id){
+        Assert.isTrue(id > 0, "id should be larger than 0");
+        return this.categoryMapper.getCategoryById(id);
+    }
+
     /**
      * 获取分类下所有分类
      *

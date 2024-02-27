@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Locale;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.*;
 import static com.lizumin.wms.tool.MessageUtil.*;
 
 @SpringBootTest
+@ActiveProfiles(value = "test")
 public class MessageUtilTest {
     /**
      * 测试i18项不存在时获取翻译，此时返回原信息

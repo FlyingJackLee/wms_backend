@@ -3,10 +3,8 @@ package com.lizumin.wms.service;
 import com.lizumin.wms.dao.MerchandiseMapper;
 import com.lizumin.wms.entity.Merchandise;
 import com.lizumin.wms.entity.User;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.List;
@@ -39,7 +37,24 @@ public class MerchandiseService {
      */
     public List<Merchandise> getNonSoldMerchandise(int ownerId, int limit, int offset) {
         Assert.isTrue( ownerId > 0 && limit > 0 && offset >= 0, "invalid id or page options");
-        return merchandiseMapper.getAllMerchandiseBySold(ownerId, false, limit, offset);
+        return merchandiseMapper.getAllMerchandise(ownerId, false, limit, offset);
+    }
+
+    /**
+     * 获取分类下所有商品
+     *
+     * @param authentication
+     * @param cateId
+     * @param sold
+     * @return
+     */
+    public List<Merchandise> getMerchandiseByCateId(Authentication authentication, int cateId, boolean sold) {
+        Assert.isTrue( cateId > 0, "invalid cate id");
+        return merchandiseMapper.getMerchandiseByCateID(cateId, sold, getIdFromAuthentication(authentication));
+    }
+
+    public List<Merchandise> getMerchandiseByCateId(Authentication authentication, int cateId) {
+        return getMerchandiseByCateId(authentication, cateId, false);
     }
 
     /**

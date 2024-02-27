@@ -30,7 +30,7 @@ public class MerchandiseServiceTest {
     @Test
     public void should_call_mapper_when_retrieval_mes() {
         this.merchandiseService.getNonSoldMerchandise(1, 3,5);
-        verify(merchandiseMapper, times(1)).getAllMerchandiseBySold(1, false, 3, 5);
+        verify(merchandiseMapper, times(1)).getAllMerchandise(1, false, 3, 5);
     }
 
     /**

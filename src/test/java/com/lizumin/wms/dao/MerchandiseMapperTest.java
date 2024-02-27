@@ -68,13 +68,13 @@ public class MerchandiseMapperTest {
      */
     @Test
     public void should_get_relevant_merchandise_when_giving_owner_id() {
-        List<Merchandise> merchandises = this.merchandiseMapper.getAllMerchandise(1, 3, 0);
+        List<Merchandise> merchandises = this.merchandiseMapper.getAllMerchandise(1, false, 3, 0);
         assertThat(merchandises.size(), is(3));
         assertThat(merchandises.get(0).getId(), is(1));
 
-        merchandises = this.merchandiseMapper.getAllMerchandise(999, 3, 0);
+        merchandises = this.merchandiseMapper.getAllMerchandise(999, false ,3, 0);
         assertThat(merchandises, empty());
-        merchandises = this.merchandiseMapper.getAllMerchandise(1, 99, 99);
+        merchandises = this.merchandiseMapper.getAllMerchandise(1, false ,99, 99);
         assertThat(merchandises, empty());
     }
 
@@ -83,10 +83,9 @@ public class MerchandiseMapperTest {
      */
     @Test
     public void should_get_sold_me_when_giving_id() {
-        int total = this.merchandiseMapper.getAllMerchandise(1, 999, 0).size();
-        int sold = this.merchandiseMapper.getAllMerchandiseBySold(1,true , 999, 0).size();
-        int nonSold = this.merchandiseMapper.getAllMerchandiseBySold(1,false , 999, 0).size();
-        assertThat(total, is(sold + nonSold));
+        int sold = this.merchandiseMapper.getAllMerchandise(1,true , 999, 0).size();
+        int nonSold = this.merchandiseMapper.getAllMerchandise(1,false , 999, 0).size();
+        assertThat(sold + nonSold, greaterThan(0));
     }
 
     /**
@@ -109,13 +108,13 @@ public class MerchandiseMapperTest {
      */
     @Test
     public void should_get_relevant_list_of_merchandise_when_giving_cate_id() {
-        List<Merchandise> mes = this.merchandiseMapper.getMerchandiseByCateID(11, 1);
+        List<Merchandise> mes = this.merchandiseMapper.getMerchandiseByCateID(11, false ,1);
         assertThat(mes.size(), is(5));
 
-        mes = this.merchandiseMapper.getMerchandiseByCateID(999, 1);
+        mes = this.merchandiseMapper.getMerchandiseByCateID(999, false, 1);
         assertThat(mes, empty());
 
-        mes = this.merchandiseMapper.getMerchandiseByCateID(11, 99);
+        mes = this.merchandiseMapper.getMerchandiseByCateID(11, false, 99);
         assertThat(mes, empty());
     }
 

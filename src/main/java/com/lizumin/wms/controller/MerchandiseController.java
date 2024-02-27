@@ -1,5 +1,6 @@
 package com.lizumin.wms.controller;
 
+import com.lizumin.wms.entity.Merchandise;
 import com.lizumin.wms.entity.User;
 import com.lizumin.wms.service.MerchandiseService;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,5 +50,15 @@ public class MerchandiseController {
         data.put("merchandise", merchandiseService.getNonSoldMerchandise(id, limit, offset));
 
         return ResponseEntity.ok(data);
+    }
+
+    @GetMapping("/cate")
+    public ResponseEntity<List<Merchandise>> getMerchandiseByCateId(Authentication authentication,
+                                                                    @RequestParam("cate_id") int cateId){
+        if (cateId < 1) {
+            return ResponseEntity.badRequest().body(List.of());
+        }
+
+        return ResponseEntity.ok(this.merchandiseService.getMerchandiseByCateId(authentication, cateId));
     }
 }

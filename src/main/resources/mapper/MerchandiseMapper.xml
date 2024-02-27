@@ -17,13 +17,6 @@
     <select id="getAllMerchandise" resultMap="merchandise">
         SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
         FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
-        WHERE M.own_id = #{owner_id}
-        LIMIT #{limit} OFFSET #{offset};
-    </select>
-
-    <select id="getAllMerchandiseBySold" resultMap="merchandise">
-        SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
-        FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
         WHERE M.own_id = #{owner_id} AND M.sold = #{sold}
         LIMIT #{limit} OFFSET #{offset};
     </select>
@@ -37,7 +30,7 @@
     <select id="getMerchandiseByCateID" resultMap="merchandise">
         SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
         FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
-        WHERE M.cate_id = #{cate_id} AND M.own_id = #{owner_id};
+        WHERE M.cate_id = #{cate_id} AND M.own_id = #{owner_id} AND M.sold = #{sold};
     </select>
 
     <select id="insertMerchandise">

@@ -9,6 +9,7 @@ import com.lizumin.wms.service.RedisOperatorImpl;
 import com.lizumin.wms.service.UserService;
 import com.lizumin.wms.tool.MessageUtil;
 import com.lizumin.wms.tool.Verify;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;

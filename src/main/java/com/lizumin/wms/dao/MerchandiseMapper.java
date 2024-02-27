@@ -35,18 +35,6 @@ public interface MerchandiseMapper {
     Merchandise getMerchandiseById(@Param("me_id") int id, @Param("owner_id") int ownerId);
 
     /**
-     * 根据用户id分页寻找所有商品
-     *
-     * @param ownerId 用户id，一般由jwt决定
-     * @param offset 查询起点，e.g. 5意味着第6行开始
-     * @param limit  查询长度, e.g. 10 意味着 6,7 ... 15
-     * @return
-     */
-    List<Merchandise> getAllMerchandise(@Param("owner_id") int ownerId,
-                                        @Param("limit") int limit,
-                                        @Param("offset") int offset);
-
-    /**
      * 根据用户id和售出情况, 分页寻找所有商品
      *
      * @param ownerId 用户id，一般由jwt决定
@@ -55,7 +43,7 @@ public interface MerchandiseMapper {
      * @param limit  查询长度, e.g. 10 意味着 6,7 ... 15
      * @return
      */
-    List<Merchandise> getAllMerchandiseBySold(@Param("owner_id") int ownerId,
+    List<Merchandise> getAllMerchandise(@Param("owner_id") int ownerId,
                                         @Param("sold") boolean sold,
                                         @Param("limit") int limit,
                                         @Param("offset") int offset);
@@ -76,7 +64,9 @@ public interface MerchandiseMapper {
      * @param ownerId
      * @return
      */
-    List<Merchandise> getMerchandiseByCateID(@Param("cate_id") int cate_id, @Param("owner_id") int ownerId);
+    List<Merchandise> getMerchandiseByCateID(@Param("cate_id") int cate_id,
+                                             @Param("sold") boolean sold,
+                                             @Param("owner_id") int ownerId);
 
     /**
      * 插入商品

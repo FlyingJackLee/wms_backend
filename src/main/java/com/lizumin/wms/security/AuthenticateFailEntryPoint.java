@@ -1,5 +1,6 @@
 package com.lizumin.wms.security;
 
+import com.lizumin.wms.exception.AuthenticationUserException;
 import com.lizumin.wms.tool.MessageUtil;
 import com.lizumin.wms.tool.ResponseTool;
 import jakarta.servlet.ServletException;
@@ -19,8 +20,12 @@ public class AuthenticateFailEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         logger.debug("Authentication failed.");
         String message = MessageUtil.getMessageByRequest(authException.getMessage(), request);
-
-        response.setStatus(HttpStatus.BAD_REQUEST.value());
+        if (authException instanceof AuthenticationUserException) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        }
+        else {
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+        }
         ResponseTool.writeValue(response, "error", message);
     }
 }
