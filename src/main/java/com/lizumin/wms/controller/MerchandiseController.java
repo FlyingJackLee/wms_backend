@@ -1,16 +1,16 @@
 package com.lizumin.wms.controller;
 
+import com.lizumin.wms.entity.ApiRes;
 import com.lizumin.wms.entity.Merchandise;
 import com.lizumin.wms.entity.User;
 import com.lizumin.wms.service.MerchandiseService;
+import com.lizumin.wms.tool.Verify;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,23 +31,22 @@ public class MerchandiseController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Map<String, Object>> getNonSoldMerchandise(Authentication authentication,
-                                                                   @RequestParam @Nullable boolean sold,
-                                                                   @RequestParam int limit,
-                                                                   @RequestParam int offset) {
+    public ResponseEntity<Map<String, Object>> getMerchandise(Authentication authentication,
+                                                              @RequestParam @Nullable boolean sold,
+                                                              @RequestParam int limit,
+                                                              @RequestParam int offset) {
         //  如果超过限制，返回400和空list
-        if (limit > 999) {
+        if (limit > 999 || limit <=0 || offset < 0) {
             return ResponseEntity.badRequest().body(Map.of());
         }
 
         int count  = this.merchandiseService.getMerchandiseCount(authentication, sold);
-
         limit = limit > count ? count : limit;
 
-        int id = ((User) authentication.getPrincipal()).getId();
+
         Map<String, Object> data = new HashMap<>(2);
         data.put("count", count);
-        data.put("merchandise", merchandiseService.getNonSoldMerchandise(id, limit, offset));
+        data.put("merchandise", merchandiseService.getMerchandiseByPage(authentication, limit, offset));
 
         return ResponseEntity.ok(data);
     }
@@ -60,5 +59,53 @@ public class MerchandiseController {
         }
 
         return ResponseEntity.ok(this.merchandiseService.getMerchandiseByCateId(authentication, cateId));
+    }
+
+    @PostMapping("/")
+    public ResponseEntity<ApiRes> insertMerchandise(Authentication authentication,
+                                                    @RequestParam("cate_id") int cateId,
+                                                    @RequestParam("cost") double cost,
+                                                    @RequestParam("price") double price,
+                                                    @RequestParam("imei_list") List<String> imeiList,
+                                                    @RequestParam("create_time") long createTime
+    ) {
+        if (cateId < 1) {
+            return ResponseEntity.badRequest().body(ApiRes.fail());
+        }
+        Date date = new Date(createTime);
+
+        this.merchandiseService.insertMerchandise(authentication, cateId, cost, price, imeiList, date);
+        return ResponseEntity.ok(ApiRes.success());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiRes> updateMerchandise(Authentication authentication,
+                                                    @PathVariable int id,
+                                                    @RequestParam("cost") double cost,
+                                                    @RequestParam("price") double price,
+                                                    @RequestParam("imei") String imei){
+        if (id < 1 || !Verify.isNotBlank(imei)) {
+            return ResponseEntity.badRequest().body(ApiRes.fail());
+        }
+
+        this.merchandiseService.updateMerchandise(authentication, id, cost, price, imei);
+        return ResponseEntity.ok(ApiRes.success());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiRes> deleteMerchandise(Authentication authentication, @PathVariable int id){
+        if (id < 1) {
+            return ResponseEntity.badRequest().body(ApiRes.fail());
+        }
+        this.merchandiseService.deleteMerchandise(authentication, id);
+        return ResponseEntity.ok(ApiRes.success());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Merchandise>> search(Authentication authentication, @RequestParam("text") String text, @RequestParam @Nullable boolean sold) {
+        if (!Verify.isNotBlank(text)) {
+            return ResponseEntity.badRequest().body(List.of());
+        }
+        return ResponseEntity.ok(this.merchandiseService.searchMerchandise(authentication, text, sold));
     }
 }

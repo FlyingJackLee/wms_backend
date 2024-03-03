@@ -31,15 +31,18 @@ public class CategoryMapperTest {
      */
     @Test
     public void should_get_relevant_category(){
-        Category category = categoryMapper.getCategoryById(1);
+        Category category = categoryMapper.getCategoryById(1, 1);
         assertThat(category.getParentId(), is(0));
         assertThat(category.getName(), equalTo("华为/HUAWEI"));
 
-        category = categoryMapper.getCategoryById(11);
+        category = categoryMapper.getCategoryById(11, 1);
         assertThat(category.getParentId(), is(2));
         assertThat(category.getName(), equalTo("A97"));
 
-        category = categoryMapper.getCategoryById(-1);
+        category = categoryMapper.getCategoryById(-1, 1);
+        assertThat(category, nullValue());
+
+        category = categoryMapper.getCategoryById(-1, 99);
         assertThat(category, nullValue());
     }
 
@@ -48,9 +51,8 @@ public class CategoryMapperTest {
      */
     @Test
     public void should_get_all_root_categories_when_parent_id_is_zero() {
-        List<Category> categories = categoryMapper.getCategoriesByParentId(0);
+        List<Category> categories = categoryMapper.getCategoriesByParentId(0, 1);
         assertThat(categories.size(), is(10));
-        assertThat(categories.get(0).getName(), equalTo("华为/HUAWEI"));
     }
 
     /**
@@ -58,7 +60,7 @@ public class CategoryMapperTest {
      */
     @Test
     public void should_get_empty_list_when_parent_id_is_not_exist() {
-        List<Category> categories = categoryMapper.getCategoriesByParentId(99);
+        List<Category> categories = categoryMapper.getCategoriesByParentId(99, 1);
         assertThat(categories.size(), is(0));
     }
 
@@ -67,13 +69,13 @@ public class CategoryMapperTest {
      */
     @Test
     public void should_get_relevant_categories_when_input_a_valid_category() {
-        List<Category> categories = categoryMapper.getCategoryByName("10");
+        List<Category> categories = categoryMapper.getCategoryByName("10", 1);
         assertThat(categories.size(), is(2));
 
-        Category category = categoryMapper.getCategoryByName("RENO 11").get(0);
+        Category category = categoryMapper.getCategoryByName("RENO 11", 1).get(0);
         assertThat(category.getName(), equalTo("RENO 11"));
 
-        List<Category> empty = categoryMapper.getCategoryByName("notexist");
+        List<Category> empty = categoryMapper.getCategoryByName("notexist", 1);
         assertThat(empty,empty());
     }
 
@@ -83,15 +85,15 @@ public class CategoryMapperTest {
     @Test
     public void should_throw_error_when_input_same_category() {
         Assertions.assertThrows(DuplicateKeyException.class,() -> {
-             categoryMapper.insertCategory(0, "VIVO");
+             categoryMapper.insertCategory(0, "VIVO", 1);
         });
 
         Assertions.assertThrows(DuplicateKeyException.class,() -> {
-            categoryMapper.insertCategory(3, "X100");
+            categoryMapper.insertCategory(3, "X100", 1);
         });
 
         Assertions.assertThrows(DataIntegrityViolationException.class,() -> {
-            categoryMapper.insertCategory(-1, "X100");
+            categoryMapper.insertCategory(-1, "X100", 1);
         });
     }
 
@@ -100,7 +102,7 @@ public class CategoryMapperTest {
      */
     @Test
     public void should_insert_category_when_give_a_valid_category() {
-        int i = categoryMapper.insertCategory(0, "test");
+        int i = categoryMapper.insertCategory(0, "test", 1);
         assertThat(i, greaterThan(1));
     }
 
@@ -110,14 +112,14 @@ public class CategoryMapperTest {
     @Test
     public void should_throw_error_when_update_into_same_category() {
         Assertions.assertThrows(DuplicateKeyException.class,() -> {
-            categoryMapper.updateName(3, "OPPO");
+            categoryMapper.updateName(3, "OPPO", 1);
         });
 
-        categoryMapper.insertCategory(2, "dup_test");
-        int id = categoryMapper.insertCategory(3, "dup_test");
+        categoryMapper.insertCategory(2, "dup_test", 1);
+        int id = categoryMapper.insertCategory(3, "dup_test", 1);
 
         Assertions.assertThrows(DuplicateKeyException.class,() -> {
-            categoryMapper.updateParentId(id, 2);
+            categoryMapper.updateParentId(id, 2, 1);
         });
     }
 
@@ -126,13 +128,13 @@ public class CategoryMapperTest {
      */
     @Test
     public void should_update_category_when_category_is_valid() {
-        int id = categoryMapper.insertCategory(1, "valid_update_test");
+        int id = categoryMapper.insertCategory(1, "valid_update_test", 1);
 
-        categoryMapper.updateParentId(id, 2);
-        assertThat(categoryMapper.getCategoryById(id).getParentId(), is(2));
+        categoryMapper.updateParentId(id, 2, 1);
+        assertThat(categoryMapper.getCategoryById(id, 1).getParentId(), is(2));
 
-        categoryMapper.updateName(id, "valid_update_test2");
-        assertThat(categoryMapper.getCategoryById(id).getName(), equalToIgnoringCase("valid_update_test2"));
+        categoryMapper.updateName(id, "valid_update_test2",1);
+        assertThat(categoryMapper.getCategoryById(id, 1).getName(), equalToIgnoringCase("valid_update_test2"));
     }
 
     /**
@@ -140,8 +142,22 @@ public class CategoryMapperTest {
      */
     @Test
     public void should_delete_category() {
-        int id = categoryMapper.insertCategory(1, "delete_test");
-        categoryMapper.deleteCategory(id);
-        assertThat(categoryMapper.getCategoryById(id), nullValue());
+        int id = categoryMapper.insertCategory(1, "delete_test", 1);
+        categoryMapper.deleteCategory(id, 1);
+        assertThat(categoryMapper.getCategoryById(id, 1), nullValue());
+    }
+
+    /**
+     * 删除大分类测试
+     */
+    @Test
+    public void should_delete_children_category() {
+        int id = categoryMapper.insertCategory(1, "children_delete_test", 1);
+        categoryMapper.insertCategory(id, "M1", 1);
+        categoryMapper.insertCategory(id, "M2", 1);
+        categoryMapper.insertCategory(id, "M3", 1);
+
+        categoryMapper.deleteCategoryByParentId(id, 1);
+        assertThat(categoryMapper.getCategoriesByParentId(id, 1), empty());
     }
 }

@@ -5,30 +5,34 @@
 
 <mapper namespace="com.lizumin.wms.dao.CategoryMapper">
     <select id="getCategoryById">
-        SELECT cate_id id, parent_cate_id parent_id, name FROM category WHERE cate_id = #{cate_id};
+        SELECT cate_id id, parent_cate_id parent_id, name FROM category WHERE cate_id = #{cate_id} AND own_id = #{own_id};;
     </select>
 
     <select id="getCategoriesByParentId">
-        SELECT cate_id id, parent_cate_id parent_id, name FROM category WHERE parent_cate_id = #{parent_id};
+        SELECT cate_id id, parent_cate_id parent_id, name FROM category WHERE parent_cate_id = #{parent_id} AND own_id = #{own_id};
     </select>
 
     <select id="getCategoryByName">
-        SELECT cate_id id, parent_cate_id parent_id, name FROM category WHERE name LIKE CONCAT('%', #{name}, '%');
+        SELECT cate_id id, parent_cate_id parent_id, name FROM category WHERE name LIKE CONCAT('%', #{name}, '%') AND own_id = #{own_id};
     </select>
 
     <select id="insertCategory">
-        INSERT INTO category(parent_cate_id, name) VALUES (#{parent_id}, #{name}) RETURNING cate_id;
+        INSERT INTO category(parent_cate_id, name, own_id) VALUES (#{parent_id}, #{name}, #{own_id}) RETURNING cate_id;
     </select>
 
     <update id="updateParentId">
-        UPDATE category SET parent_cate_id = #{parent_id} WHERE cate_id = #{cate_id};
+        UPDATE category SET parent_cate_id = #{parent_id} WHERE cate_id = #{cate_id} AND own_id = #{own_id};;
     </update>
 
     <update id="updateName">
-        UPDATE category SET name = #{name} WHERE cate_id = #{cate_id};
+        UPDATE category SET name = #{name} WHERE cate_id = #{cate_id} AND own_id = #{own_id};;
     </update>
 
     <delete id="deleteCategory">
-        DELETE FROM category WHERE cate_id = #{cate_id};
+        DELETE FROM category WHERE cate_id = #{cate_id} AND own_id = #{own_id};
+    </delete>
+
+    <delete id="deleteCategoryByParentId">
+        DELETE FROM category WHERE parent_cate_id = #{parent_id} AND own_id = #{own_id};
     </delete>
 </mapper>

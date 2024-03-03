@@ -93,13 +93,16 @@ public class MerchandiseMapperTest {
      */
     @Test
     public void should_get_relevant_merchandise_when_giving_imei() {
-        Merchandise me = this.merchandiseMapper.getMerchandiseByImei("123456789000012", 1);
+        Merchandise me = this.merchandiseMapper.getMerchandiseByImei("123456789000012", false , 1);
         assertThat(me.getCategory().getName(), equalTo("X100"));
 
-        me = this.merchandiseMapper.getMerchandiseByImei("9999956789000012", 1);
+        me = this.merchandiseMapper.getMerchandiseByImei("9999956789000012", false ,1);
         assertThat(me, nullValue());
 
-        me = this.merchandiseMapper.getMerchandiseByImei("123456789000012", 999);
+        me = this.merchandiseMapper.getMerchandiseByImei("123456789000012", false ,999);
+        assertThat(me, nullValue());
+
+        me = this.merchandiseMapper.getMerchandiseByImei("123456789000012", true , 1);
         assertThat(me, nullValue());
     }
 
@@ -165,5 +168,50 @@ public class MerchandiseMapperTest {
         // 不存在的id不报错测试
         this.merchandiseMapper.updateSold(99999, true, 1);
         this.merchandiseMapper.updateSold(id, true, 9999);
+    }
+
+    /**
+     * 删除商品测试
+     */
+    @Test
+    public void should_delete_me_and_orders_when_delete() {
+        int id = this.merchandiseMapper.insertMerchandise(12, 999.00, 1500.00,
+                "00000000000000033", new Date(), 1);
+
+        this.merchandiseMapper.deleteMerchandise(id, 1);
+        assertThat(this.merchandiseMapper.getMerchandiseById(id, 1), nullValue());
+    }
+
+    /**
+     * 更新商品测试
+     */
+    @Test
+    public void should_update_me_when_update() {
+        int id = this.merchandiseMapper.insertMerchandise(12, 999.00, 1500.00,
+                "00000000000000044", new Date(), 1);
+        this.merchandiseMapper.updateMerchandise(id, 111, 1111, "9999", 1);
+
+        Merchandise result = this.merchandiseMapper.getMerchandiseById(id, 1);
+        assertThat(result.getCost(), closeTo(111, 1));
+        assertThat(result.getPrice(), closeTo(1111, 1));
+        assertThat(result.getImei(), equalTo("9999"));
+    }
+
+    /**
+     * 搜索测试
+     */
+    @Test
+    public void should_get_mes_when_search() {
+        List<Merchandise> result = this.merchandiseMapper.searchMerchandise("notexist", false, 1);
+        assertThat(result, empty());
+        result = this.merchandiseMapper.searchMerchandise("A97", false,99);
+        assertThat(result, empty());
+
+        result = this.merchandiseMapper.searchMerchandise("A97", false,1);
+        assertThat(result.size(), greaterThan(1));
+        result.forEach(me -> {
+            assertThat(me.isSold(), is(false));
+        });
+
     }
 }

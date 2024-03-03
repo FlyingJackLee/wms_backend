@@ -6,22 +6,22 @@ INSERT INTO users(username, password) VALUES ('testmodified', '$2a$10$4ESEs548mQ
 INSERT INTO users_detail(user_id, email, phone_number) VALUES (currval(pg_get_serial_sequence('users','id')), 'testmodified@test.com', '13212341234');
 INSERT INTO authorities(user_id, authority) VALUES (currval(pg_get_serial_sequence('users','id')), 'ROLE_USER');
 
-INSERT INTO category(parent_cate_id, name) values (0, '华为/HUAWEI');
-INSERT INTO category(parent_cate_id, name) values (0, 'OPPO');
-INSERT INTO category(parent_cate_id, name) values (0, '荣耀/HONOR');
-INSERT INTO category(parent_cate_id, name) values (0, 'VIVO');
-INSERT INTO category(parent_cate_id, name) values (0, '三星/SAMSUNG');
-INSERT INTO category(parent_cate_id, name) values (0, '苹果/Apple');
-INSERT INTO category(parent_cate_id, name) values (0, '魅族/MEIZU');
-INSERT INTO category(parent_cate_id, name) values (0, '一加/ONEPLUS');
-INSERT INTO category(parent_cate_id, name) values (0, '中兴');
-INSERT INTO category(parent_cate_id, name) values (0, '小米/XIAOMI');
+INSERT INTO category(parent_cate_id, name, own_id) values (0, '华为/HUAWEI', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (0, 'OPPO', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (0, '荣耀/HONOR', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (0, 'VIVO', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (0, '三星/SAMSUNG', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (0, '苹果/Apple', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (0, '魅族/MEIZU', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (0, '一加/ONEPLUS', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (0, '中兴', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (0, '小米/XIAOMI', 1);
 
-INSERT INTO category(parent_cate_id, name) values (2, 'A97');
-INSERT INTO category(parent_cate_id, name) values (2, 'RENO 11');
-INSERT INTO category(parent_cate_id, name) values (2, 'RENO 10');
-INSERT INTO category(parent_cate_id, name) values (3, 'X100');
-INSERT INTO category(parent_cate_id, name) values (3, 'X40');
+INSERT INTO category(parent_cate_id, name, own_id) values (2, 'A97', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (2, 'RENO 11', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (2, 'RENO 10', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (3, 'X100', 1);
+INSERT INTO category(parent_cate_id, name, own_id) values (3, 'X40', 1);
 
 
 -- A97

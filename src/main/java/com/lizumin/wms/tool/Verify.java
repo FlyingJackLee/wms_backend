@@ -1,5 +1,6 @@
 package com.lizumin.wms.tool;
 
+import java.util.Date;
 import java.util.regex.Pattern;
 
 public class Verify {
@@ -35,5 +36,14 @@ public class Verify {
 
     public static boolean verifyPhoneNumber(String target) {
         return verifyByPattern(target, PHONE_VERIFY_PATTERN);
+    }
+
+    public static boolean verifyTimestamp(long stamp) {
+        try {
+            Date date = new Date(stamp);
+            return stamp == date.getTime();
+        } catch (Exception e){
+            return false;
+        }
     }
 }

@@ -3,7 +3,9 @@ package com.lizumin.wms.service;
 import com.lizumin.wms.dao.CategoryMapper;
 import com.lizumin.wms.entity.Category;
 import com.lizumin.wms.tool.Verify;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.List;
@@ -15,7 +17,7 @@ import java.util.List;
  * @date 2024/2/13 15:07
  */
 @Service
-public class CategoryService {
+public class CategoryService extends AbstractAuthenticationService {
     private CategoryMapper categoryMapper;
 
     public CategoryService(CategoryMapper categoryMapper) {
@@ -27,13 +29,20 @@ public class CategoryService {
      *
      * @return
      */
-    public List<Category> getRootCategories() {
-        return this.categoryMapper.getCategoriesByParentId(0);
+    public List<Category> getRootCategories(Authentication authentication) {
+        return this.categoryMapper.getCategoriesByParentId(0, getOwnerId(authentication));
     }
 
-    public Category getCategory(int id){
+    /**
+     * 通过id获取cate
+     *
+     * @param authentication
+     * @param id
+     * @return
+     */
+    public Category getCategory(Authentication authentication, int id){
         Assert.isTrue(id > 0, "id should be larger than 0");
-        return this.categoryMapper.getCategoryById(id);
+        return this.categoryMapper.getCategoryById(id, getOwnerId(authentication));
     }
 
     /**
@@ -42,9 +51,9 @@ public class CategoryService {
      * @param parentId
      * @return
      */
-    public List<Category> getCategoriesByParentId(int parentId) {
+    public List<Category> getCategoriesByParentId(Authentication authentication, int parentId) {
         Assert.isTrue(parentId >= 0, "parent_id should be larger than or equal 0");
-        return this.categoryMapper.getCategoriesByParentId(parentId);
+        return this.categoryMapper.getCategoriesByParentId(parentId, getOwnerId(authentication));
     }
 
     /**
@@ -54,9 +63,23 @@ public class CategoryService {
      * @param name
      * @return
      */
-    public int insertCategory(int parentID, String name) {
-        Assert.isTrue(parentID > 0, "parent_id should be larger than 0");
+    public int insertCategory(Authentication authentication, int parentID, String name) {
+        Assert.isTrue(parentID >= 0, "parent_id should be larger than 0");
         Assert.isTrue(Verify.isNotBlank(name), "category must have a name");
-        return this.categoryMapper.insertCategory(parentID, name);
+        return this.categoryMapper.insertCategory(parentID, name, getOwnerId(authentication));
+    }
+
+    /**
+     * 删除cate
+     *
+     * @param authentication
+     * @param id
+     */
+    @Transactional
+    public void deleteCategory(Authentication authentication, int id){
+        Assert.isTrue(id >= 1, "id should be larger than 0");
+        // 先删除子类 在删除父类
+        this.categoryMapper.deleteCategoryByParentId(id, getOwnerId(authentication));
+        this.categoryMapper.deleteCategory(id, getOwnerId(authentication));
     }
 }

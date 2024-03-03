@@ -55,7 +55,7 @@ public interface MerchandiseMapper {
      * @param ownerId
      * @return
      */
-    Merchandise getMerchandiseByImei(@Param("imei") String imei, @Param("owner_id") int ownerId);
+    Merchandise getMerchandiseByImei(@Param("imei") String imei, @Param("sold") boolean sold, @Param("owner_id") int ownerId);
 
     /**
      * 根据分类id查询商品
@@ -82,11 +82,40 @@ public interface MerchandiseMapper {
                           @Param("imei") String imei, @Param("create_time") Date createDate, @Param("owner_id") int ownerId);
 
     /**
-     * 更新销售状况
+     * 更新销售状况22
      *
      * @param meId
      * @param sold
      * @param ownerId
      */
     void updateSold(@Param("me_id") int meId, @Param("sold") boolean sold,  @Param("owner_id") int ownerId);
+
+    /**
+     * 修改商品信息
+     *
+     * @param meId
+     * @param cost
+     * @param price
+     * @param imei
+     * @param ownerId
+     */
+    void updateMerchandise(@Param("me_id") int meId, @Param("cost") double cost, @Param("price") double price,
+                           @Param("imei") String imei,  @Param("owner_id") int ownerId);
+
+    /**
+     * 搜索商品
+     *
+     * @param text
+     * @return
+     */
+    List<Merchandise> searchMerchandise(@Param("text") String text, @Param("sold") boolean sold, @Param("owner_id") int ownerId);
+
+    /**
+     * 强影响操作：
+     *  删除商品,以及相关order
+     *
+     * @param meId
+     * @param ownerId
+     */
+    void deleteMerchandise(@Param("me_id") int meId, @Param("owner_id") int ownerId);
 }

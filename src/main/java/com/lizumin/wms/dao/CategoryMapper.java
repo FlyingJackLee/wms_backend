@@ -22,7 +22,7 @@ public interface CategoryMapper {
      * @param cateId
      * @return
      */
-    Category getCategoryById(@Param("cate_id") int cateId);
+    Category getCategoryById(@Param("cate_id") int cateId, @Param("own_id") int ownId);
 
     /**
      * 查询大分类下的所有分类
@@ -30,7 +30,7 @@ public interface CategoryMapper {
      * @param parentId
      * @return categories
      */
-    List<Category> getCategoriesByParentId(@Param("parent_id") int parentId);
+    List<Category> getCategoriesByParentId(@Param("parent_id") int parentId, @Param("own_id") int ownId);
 
     /**
      * 根据name模糊查询category
@@ -38,7 +38,7 @@ public interface CategoryMapper {
      * @param name
      * @return
      */
-    List<Category> getCategoryByName(@Param("name") String name);
+    List<Category> getCategoryByName(@Param("name") String name, @Param("own_id") int ownId);
 
     /**
      * 添加新的category
@@ -49,7 +49,7 @@ public interface CategoryMapper {
      * @throws DuplicateKeyException 同一个parent id下不能有同名name
      *         DataIntegrityViolationException parent id必须有效（大于0）
      */
-    int insertCategory(@Param("parent_id") int parentID, @Param("name") String name) throws DuplicateKeyException, DataIntegrityViolationException;
+    int insertCategory(@Param("parent_id") int parentID, @Param("name") String name, @Param("own_id") int ownId) throws DuplicateKeyException, DataIntegrityViolationException;
 
     /**
      * 修改父分类
@@ -59,7 +59,7 @@ public interface CategoryMapper {
      * @throws DuplicateKeyException 同一个parent id下不能有同名name
      *         DataIntegrityViolationException parent id必须有效（大于0）
      */
-    void updateParentId(@Param("cate_id") int cateId, @Param("parent_id") int parentID) throws DuplicateKeyException, DataIntegrityViolationException;
+    void updateParentId(@Param("cate_id") int cateId, @Param("parent_id") int parentID, @Param("own_id") int ownId) throws DuplicateKeyException, DataIntegrityViolationException;
 
     /**
      * 修改分类名
@@ -68,12 +68,20 @@ public interface CategoryMapper {
      * @param name
      * @throws DuplicateKeyException 同一个parent id下不能有同名name
      */
-    void updateName(@Param("cate_id") int cateId, @Param("name") String name) throws DuplicateKeyException;
+    void updateName(@Param("cate_id") int cateId, @Param("name") String name, @Param("own_id") int ownId) throws DuplicateKeyException;
 
     /**
      * 删除category
      *
      * @param cateId
      */
-    void deleteCategory(@Param("cate_id") int cateId);
+    void deleteCategory(@Param("cate_id") int cateId, @Param("own_id") int ownId);
+
+    /**
+     * 通过parent id删除category
+     *
+     * @param parentId
+     * @param ownId
+     */
+    void deleteCategoryByParentId(@Param("parent_id") int parentId, @Param("own_id") int ownId);
 }

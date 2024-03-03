@@ -13,7 +13,6 @@ import java.io.IOException;
 public class JwtAuthenticationFailureHandler implements AuthenticationFailureHandler {
     protected final Log logger = LogFactory.getLog(getClass());
 
-
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
 
