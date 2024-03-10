@@ -54,3 +54,13 @@ INSERT INTO merchandise(cate_id, cost, price, imei, create_time, own_id)
 values (14, 2000.00, 2399.00 , 123456789000012,'2024-02-12  10:23:54'  , 1);
 INSERT INTO merchandise(cate_id, cost, price, sold, imei, create_time, own_id)
 values (14, 2000.00, 2399.00, true , 123456789000013,'2024-02-12  10:23:54'  , 1);
+
+
+
+INSERT INTO notices (type, publish_time, content) VALUES ('update', '2024-03-13 23:29:05.000000', '测试内容');
+INSERT INTO notices (type, publish_time, content) VALUES ('update', '2024-03-10 23:29:05.000000', '测试内容');
+INSERT INTO notices (type, publish_time, content) VALUES ('update', '2024-03-12 23:29:05.000000', '测试内容');
+INSERT INTO notices (type, publish_time, content) VALUES ('update', '2024-03-11 23:29:05.000000', '测试内容');
+
+INSERT INTO notices (type, publish_time, content) VALUES ('warn', '2024-03-10 23:29:05.000000', '测试内容');
+INSERT INTO notices (type, publish_time, content) VALUES ('warn', '2024-03-11 23:29:05.000000', '测试内容');

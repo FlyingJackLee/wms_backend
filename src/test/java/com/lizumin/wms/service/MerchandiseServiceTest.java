@@ -56,7 +56,7 @@ public class MerchandiseServiceTest {
     @Test
     public void should_throw_exception_when_invalid_paras() {
         Assertions.assertThrows(IllegalArgumentException.class,() ->  this.merchandiseService.getMerchandiseByPage(null, false, 3,5));
-        Assertions.assertThrows(IllegalArgumentException.class,() ->  this.merchandiseService.getMerchandiseByPage(authentication, false, 0,5));
+        Assertions.assertThrows(IllegalArgumentException.class,() ->  this.merchandiseService.getMerchandiseByPage(authentication, false, -1,5));
         Assertions.assertThrows(IllegalArgumentException.class,() ->  this.merchandiseService.getMerchandiseByPage(authentication, false,1,-1));
     }
 

@@ -92,6 +92,7 @@
 		</dependency>
 	</dependencies>
 	<build>
+		<finalName>wms_backend_beta_v111</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

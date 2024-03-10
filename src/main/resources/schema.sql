@@ -76,6 +76,13 @@ CREATE TABLE IF NOT EXISTS orders(
 -- 当returned为false（未退回订单），不允许二次销售
 CREATE UNIQUE INDEX idx_me_re on orders(me_id, returned) where (returned = false);
 
+CREATE TABLE IF NOT EXISTS notices(
+                                      id serial primary key not null UNIQUE ,
+                                      type varchar(10) not null DEFAULT 'warn',
+                                      publish_time timestamp not null DEFAULT CURRENT_TIMESTAMP,
+                                      content varchar(5000) not null DEFAULT '无'
+);
+
 INSERT INTO category(parent_cate_id, name, own_id) values (0, '华为/HUAWEI', 1);
 INSERT INTO category(parent_cate_id, name, own_id) values (0, 'OPPO', 1);
 INSERT INTO category(parent_cate_id, name, own_id) values (0, '荣耀/HONOR', 1);
