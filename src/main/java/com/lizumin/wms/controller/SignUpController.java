@@ -1,24 +1,17 @@
 package com.lizumin.wms.controller;
 
 import com.lizumin.wms.dao.RedisOperator;
-import com.lizumin.wms.entity.SimpleAuthority;
+import com.lizumin.wms.entity.SystemAuthority;
 import com.lizumin.wms.entity.User;
-import com.lizumin.wms.aop.RequestRateLimit;
-import com.lizumin.wms.service.MailService;
-import com.lizumin.wms.service.RedisOperatorImpl;
 import com.lizumin.wms.service.UserService;
 import com.lizumin.wms.tool.MessageUtil;
 import com.lizumin.wms.tool.Verify;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.*;
 
 @RestController
@@ -52,8 +45,9 @@ public class SignUpController {
             return ResponseEntity.badRequest().body(MessageUtil.getMessageByContext("BPV-010"));
         }
 
-        User userAdd = new User(username, this.passwordEncode.encode(password));
-        userAdd.setAuthorities(defaultAuthority());
+        // 新建账户流程
+        User userAdd = new User(username, this.passwordEncode.encode(password)); // 默认为0的group
+        userAdd.setAuthorities(SystemAuthority.defaults()); // 角色设置为默认 - 未加入group， 无权限
 
         try {
             this.userService.insertUser(userAdd);
@@ -94,8 +88,10 @@ public class SignUpController {
         }
 
         String username = generateUniqueUsername();
-        User userAdd = new User(username, this.passwordEncode.encode(password));
-        userAdd.setAuthorities(defaultAuthority());
+
+        User userAdd = new User(username, this.passwordEncode.encode(password));// 默认为0的group
+        userAdd.setAuthorities(SystemAuthority.defaults()); // 角色设置为默认 - 未加入group， 无权限
+
         try {
             this.userService.insertUser(userAdd, email, null);
         } catch (DuplicateKeyException e){
@@ -119,11 +115,5 @@ public class SignUpController {
             maxAttempts++;
         }
         return username;
-    }
-
-    private Set<GrantedAuthority> defaultAuthority() {
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        authorities.add(SimpleAuthority.userAuthority());
-        return authorities;
     }
 }

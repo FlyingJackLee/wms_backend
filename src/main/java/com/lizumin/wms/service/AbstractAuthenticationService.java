@@ -2,6 +2,7 @@ package com.lizumin.wms.service;
 
 import com.lizumin.wms.entity.User;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.Assert;
 
 /**
@@ -11,11 +12,32 @@ import org.springframework.util.Assert;
  * @date 2024/3/1 15:41
  */
 public abstract class AbstractAuthenticationService {
-    protected int getOwnerId(Authentication authentication) {
+    protected int getUserId(Authentication authentication) {
         Assert.notNull(authentication, "authentication cannot be null");
         Object user = authentication.getPrincipal();
         Assert.isInstanceOf(User.class, user, "Principal must be a user");
 
         return ((User) user).getId();
+    }
+
+    /**
+     * 获取当前用户id
+     *
+     */
+    protected int getUserId() {
+        return getUser().getId();
+    }
+
+    /**
+     * 获取当前用户
+     *
+     */
+    protected User getUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Assert.notNull(authentication, "authentication cannot be null");
+        Object user = authentication.getPrincipal();
+        Assert.isInstanceOf(User.class, user, "Principal must be a user");
+
+        return (User) user;
     }
 }

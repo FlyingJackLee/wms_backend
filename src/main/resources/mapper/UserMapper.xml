@@ -12,8 +12,14 @@
         SELECT t1.username FROM users t1 INNER JOIN users_detail t2 ON t1.id = t2.user_id WHERE t2.phone_number = #{phone_number};
     </select>
 
+    <select id="getUserById" resultMap="userDetail">
+        SELECT t1.id, t1.username, t1.password, t1.enabled, t1.accountnonexpired, t1.credentialsnonexpired, t1.accountnonlocked, t2.authority, t1.group_id
+        FROM users t1 LEFT JOIN authorities t2 ON t1.id = t2.user_id
+        WHERE t1.id = #{user_id};
+    </select>
+
     <select id="getUserByUsername" resultMap="userDetail">
-        SELECT t1.id, t1.username, t1.password, t1.enabled, t1.accountnonexpired, t1.credentialsnonexpired, t1.accountnonlocked, t2.authority
+        SELECT t1.id, t1.username, t1.password, t1.enabled, t1.accountnonexpired, t1.credentialsnonexpired, t1.accountnonlocked, t2.authority, t1.group_id
         FROM users t1 LEFT JOIN authorities t2 ON t1.id = t2.user_id
         WHERE t1.username = #{username};
     </select>
@@ -25,7 +31,10 @@
         <result property="accountNonExpired" column="accountnonexpired" />
         <result property="credentialsNonExpired" column="credentialsnonexpired" />
         <result property="accountNonLocked" column="accountnonlocked" />
-        <collection property="authorities" column="user_id" ofType="com.lizumin.wms.entity.SimpleAuthority">
+        <association property="group" javaType="com.lizumin.wms.entity.Group">
+            <result property="id" column="group_id" />
+        </association>
+        <collection property="authorities" column="user_id" ofType="com.lizumin.wms.entity.SystemAuthority">
             <result property="authority" column="authority" />
         </collection>
     </resultMap>
@@ -45,10 +54,6 @@
     <insert id="insertUser" useGeneratedKeys="true" keyProperty="id" parameterType="com.lizumin.wms.entity.User">
         INSERT INTO users(username, password, enabled, accountnonexpired, accountnonlocked, credentialsnonexpired)
                         values (#{username}, #{password}, #{enabled}, #{accountNonExpired}, #{accountNonLocked}, #{credentialsNonExpired});
-    </insert>
-
-    <insert id="insertAuthority">
-        INSERT INTO authorities(user_id, authority) values (#{user_id}, #{authority});
     </insert>
 
     <insert id="updateEmail">

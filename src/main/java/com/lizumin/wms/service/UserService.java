@@ -1,5 +1,6 @@
 package com.lizumin.wms.service;
 
+import com.lizumin.wms.dao.AuthorityMapper;
 import com.lizumin.wms.entity.User;
 import com.lizumin.wms.exception.AuthenticationUserException;
 import com.lizumin.wms.dao.UserMapper;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -20,10 +22,13 @@ public class UserService implements UserDetailsService {
 
     private PasswordEncoder passwordEncoder;
 
-    public UserService(UserMapper userMapper, UserCache userCache, PasswordEncoder passwordEncoder) {
+    private AuthorityMapper authorityMapper;
+
+    public UserService(UserMapper userMapper, UserCache userCache, PasswordEncoder passwordEncoder, AuthorityMapper authorityMapper) {
         this.userMapper = userMapper;
         this.userCache = userCache;
         this.passwordEncoder = passwordEncoder;
+        this.authorityMapper = authorityMapper;
     }
 
     /**
@@ -59,6 +64,17 @@ public class UserService implements UserDetailsService {
             this.userCache.putUserInCache(user);
         }
         return (User) user;
+    }
+
+    /**
+     * 根据id获取User
+     *
+     * @param id
+     * @return
+     */
+    public User getUserByID(int id) {
+        Assert.isTrue(id > 0, "invalid user id");
+        return this.userMapper.getUserById(id);
     }
 
     /**
@@ -122,7 +138,7 @@ public class UserService implements UserDetailsService {
         this.userMapper.insertUser(user);
         if (user.getId() >= 2) {
             user.getAuthorities().forEach(authority -> {
-                this.userMapper.insertAuthority(user.getId(), authority.getAuthority());
+                this.authorityMapper.insertAuthority(user.getId(), authority.getAuthority());
             });
         }
         return user.getId();

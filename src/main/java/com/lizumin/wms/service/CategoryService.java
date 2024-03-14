@@ -30,7 +30,7 @@ public class CategoryService extends AbstractAuthenticationService {
      * @return
      */
     public List<Category> getRootCategories(Authentication authentication) {
-        return this.categoryMapper.getCategoriesByParentId(0, getOwnerId(authentication));
+        return this.categoryMapper.getCategoriesByParentId(0, getUserId(authentication));
     }
 
     /**
@@ -42,7 +42,7 @@ public class CategoryService extends AbstractAuthenticationService {
      */
     public Category getCategory(Authentication authentication, int id){
         Assert.isTrue(id > 0, "id should be larger than 0");
-        return this.categoryMapper.getCategoryById(id, getOwnerId(authentication));
+        return this.categoryMapper.getCategoryById(id, getUserId(authentication));
     }
 
     /**
@@ -53,7 +53,7 @@ public class CategoryService extends AbstractAuthenticationService {
      */
     public List<Category> getCategoriesByParentId(Authentication authentication, int parentId) {
         Assert.isTrue(parentId >= 0, "parent_id should be larger than or equal 0");
-        return this.categoryMapper.getCategoriesByParentId(parentId, getOwnerId(authentication));
+        return this.categoryMapper.getCategoriesByParentId(parentId, getUserId(authentication));
     }
 
     /**
@@ -66,7 +66,7 @@ public class CategoryService extends AbstractAuthenticationService {
     public int insertCategory(Authentication authentication, int parentID, String name) {
         Assert.isTrue(parentID >= 0, "parent_id should be larger than 0");
         Assert.isTrue(Verify.isNotBlank(name), "category must have a name");
-        return this.categoryMapper.insertCategory(parentID, name, getOwnerId(authentication));
+        return this.categoryMapper.insertCategory(parentID, name, getUserId(authentication));
     }
 
     /**
@@ -79,7 +79,7 @@ public class CategoryService extends AbstractAuthenticationService {
     public void deleteCategory(Authentication authentication, int id){
         Assert.isTrue(id >= 1, "id should be larger than 0");
         // 先删除子类 在删除父类
-        this.categoryMapper.deleteCategoryByParentId(id, getOwnerId(authentication));
-        this.categoryMapper.deleteCategory(id, getOwnerId(authentication));
+        this.categoryMapper.deleteCategoryByParentId(id, getUserId(authentication));
+        this.categoryMapper.deleteCategory(id, getUserId(authentication));
     }
 }

@@ -15,22 +15,48 @@ BEGIN
     END IF;
 END$$;
 
-CREATE TABLE IF NOT EXISTS users(
-        id serial primary key not null UNIQUE ,
-        username varchar(50) not null UNIQUE CHECK (length(username) >= 5),
-        password varchar(500) not null CHECK ( length(password) >= 8 ),
-        accountNonExpired boolean default true,
-        accountNonLocked boolean default true,
-        credentialsNonExpired boolean default true,
-        enabled boolean default true
+CREATE TABLE IF NOT EXISTS groups(
+     group_id serial primary key not null UNIQUE,
+     store_name varchar(100) null ,
+     address varchar(200) null ,
+     contact varchar(50) null,
+     create_time timestamp not null DEFAULT CURRENT_TIMESTAMP
 );
 
-    CREATE TABLE IF NOT EXISTS users_detail(
-        user_id integer not null unique,
-        email email null unique,
-        phone_number cn_phone_number null unique,
-        constraint fk_users_detail_users foreign key(user_id) references users(id)
-    );
+CREATE TABLE IF NOT EXISTS users(
+    id serial primary key not null UNIQUE ,
+    username varchar(50) not null UNIQUE CHECK (length(username) >= 5),
+    password varchar(500) not null CHECK ( length(password) >= 8 ),
+    accountNonExpired boolean default true,
+    accountNonLocked boolean default true,
+    credentialsNonExpired boolean default true,
+    enabled boolean default true,
+    group_id integer not null default 0,
+    constraint fk_user_groups foreign key(group_id) references groups(group_id)
+);
+
+CREATE TABLE IF NOT EXISTS receipts(
+    re_id serial primary key not null UNIQUE,
+    remark varchar(200) null,
+    group_id integer not null,
+    constraint fk_receipts_groups foreign key(group_id) references groups(group_id)
+);
+
+CREATE TABLE IF NOT EXISTS users_detail(
+    user_id integer not null unique,
+    email email null unique,
+    phone_number cn_phone_number null unique,
+    constraint fk_users_detail_users foreign key(user_id) references users(id)
+);
+
+
+CREATE TABLE IF NOT EXISTS group_request(
+    group_id integer not null,
+--      用户一次只能提交一个申请
+    user_id integer not null UNIQUE,
+    constraint fk_request_users foreign key(user_id) references users(id),
+    constraint fk_request_groups foreign key(group_id) references groups(group_id)
+);
 
 CREATE TABLE IF NOT EXISTS authorities (
          user_id integer not null,
@@ -45,7 +71,7 @@ CREATE TABLE IF NOT EXISTS category(
            parent_cate_id integer not null check (parent_cate_id >= 0),
            name varchar(50) not null,
            own_id integer not null,
-           UNIQUE (own_id, parent_cate_id, name, own_id),
+           UNIQUE (own_id, parent_cate_id, name),
            constraint fk_cate_user foreign key(own_id) references users(id)
 );
 
@@ -83,13 +109,5 @@ CREATE TABLE IF NOT EXISTS notices(
                                       content varchar(5000) not null DEFAULT '无'
 );
 
-INSERT INTO category(parent_cate_id, name, own_id) values (0, '华为/HUAWEI', 1);
-INSERT INTO category(parent_cate_id, name, own_id) values (0, 'OPPO', 1);
-INSERT INTO category(parent_cate_id, name, own_id) values (0, '荣耀/HONOR', 1);
-INSERT INTO category(parent_cate_id, name, own_id) values (0, 'VIVO', 1);
-INSERT INTO category(parent_cate_id, name, own_id) values (0, '三星/SAMSUNG', 1);
-INSERT INTO category(parent_cate_id, name, own_id) values (0, '苹果/Apple', 1);
-INSERT INTO category(parent_cate_id, name, own_id) values (0, '魅族/MEIZU', 1);
-INSERT INTO category(parent_cate_id, name, own_id) values (0, '一加/ONEPLUS', 1);
-INSERT INTO category(parent_cate_id, name, own_id) values (0, '中兴', 1);
-INSERT INTO category(parent_cate_id, name, own_id) values (0, '小米/XIAOMI', 1);
+INSERT INTO groups(group_id, store_name, address) VALUES (0, '默认', '默认地址');
+INSERT INTO users(username, password) VALUES('test001', '$2a$10$MspOWt.AfeRVxWlDATHBm.FZ7ApCdEaIMIW.NqHzAJBWWiTXU2Oim');

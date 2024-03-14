@@ -40,7 +40,7 @@ public class MerchandiseService extends AbstractAuthenticationService{
      */
     public List<Merchandise> getMerchandiseByPage(Authentication authentication, boolean sold, int limit, int offset) {
         Assert.isTrue( limit >= 0 && offset >= 0, "invalid id or page options");
-        return merchandiseMapper.getAllMerchandise(getOwnerId(authentication), sold, limit, offset);
+        return merchandiseMapper.getAllMerchandise(getUserId(authentication), sold, limit, offset);
     }
 
     public List<Merchandise> getMerchandiseByPage(Authentication authentication, int limit, int offset) {
@@ -76,7 +76,7 @@ public class MerchandiseService extends AbstractAuthenticationService{
      */
     public void insertMerchandise(Authentication authentication, int cateId, double cost, double price, String imei, Date createTime) {
         Assert.isTrue( cateId > 0 && cost >= 0 && price >= 0 && createTime != null && Verify.isNotBlank(imei), "invalid parameter");
-        merchandiseMapper.insertMerchandise(cateId, cost, price, imei, createTime, getOwnerId(authentication));
+        merchandiseMapper.insertMerchandise(cateId, cost, price, imei, createTime, getUserId(authentication));
     }
 
     /**
@@ -89,7 +89,7 @@ public class MerchandiseService extends AbstractAuthenticationService{
      */
     public List<Merchandise> getMerchandiseByCateId(Authentication authentication, int cateId, boolean sold) {
         Assert.isTrue( cateId > 0, "invalid cate id");
-        return merchandiseMapper.getMerchandiseByCateID(cateId, sold, getOwnerId(authentication));
+        return merchandiseMapper.getMerchandiseByCateID(cateId, sold, getUserId(authentication));
     }
 
     public List<Merchandise> getMerchandiseByCateId(Authentication authentication, int cateId) {
@@ -103,7 +103,7 @@ public class MerchandiseService extends AbstractAuthenticationService{
      * @return
      */
     public int getMerchandiseCount(Authentication authentication) {
-        return this.merchandiseMapper.getMerchandiseCount(getOwnerId(authentication), false);
+        return this.merchandiseMapper.getMerchandiseCount(getUserId(authentication), false);
     }
 
     /**
@@ -114,7 +114,7 @@ public class MerchandiseService extends AbstractAuthenticationService{
      * @return
      */
     public int getMerchandiseCount(Authentication authentication, boolean sold) {
-        return this.merchandiseMapper.getMerchandiseCount(getOwnerId(authentication), sold);
+        return this.merchandiseMapper.getMerchandiseCount(getUserId(authentication), sold);
     }
 
     /**
@@ -126,7 +126,7 @@ public class MerchandiseService extends AbstractAuthenticationService{
      */
     public Merchandise getMerchandiseById(Authentication authentication, int id) {
         Assert.isTrue(id > 0, "illegal id");
-        return this.merchandiseMapper.getMerchandiseById(id, getOwnerId(authentication));
+        return this.merchandiseMapper.getMerchandiseById(id, getUserId(authentication));
     }
 
     /**
@@ -140,7 +140,7 @@ public class MerchandiseService extends AbstractAuthenticationService{
      */
     public void updateMerchandise(Authentication authentication, int meId, double cost, double price, String imei) {
         Assert.isTrue( meId > 0 && cost >= 0 && price >= 0 && Verify.isNotBlank(imei), "invalid parameter");
-        this.merchandiseMapper.updateMerchandise(meId, cost, price, imei, getOwnerId(authentication));
+        this.merchandiseMapper.updateMerchandise(meId, cost, price, imei, getUserId(authentication));
     }
 
     /**
@@ -151,7 +151,7 @@ public class MerchandiseService extends AbstractAuthenticationService{
      */
     public void deleteMerchandise(Authentication authentication, int id){
         Assert.isTrue( id > 0, "invalid cate id");
-        this.merchandiseMapper.deleteMerchandise(id, getOwnerId(authentication));
+        this.merchandiseMapper.deleteMerchandise(id, getUserId(authentication));
     }
 
     /**
@@ -163,7 +163,7 @@ public class MerchandiseService extends AbstractAuthenticationService{
      */
     public List<Merchandise> searchMerchandise(Authentication authentication, String text, boolean sold){
         Assert.isTrue(Verify.isNotBlank(text), "search text cannot be empty");
-        return this.merchandiseMapper.searchMerchandise(text, sold , getOwnerId(authentication));
+        return this.merchandiseMapper.searchMerchandise(text, sold , getUserId(authentication));
     }
 
     public List<Merchandise> searchMerchandise(Authentication authentication, String text){
@@ -179,6 +179,6 @@ public class MerchandiseService extends AbstractAuthenticationService{
      */
     public void updateSold(Authentication authentication, int meId, boolean sold) {
         Assert.isTrue( meId > 0, "invalid cate id");
-        this.merchandiseMapper.updateSold(meId, sold, getOwnerId(authentication));
+        this.merchandiseMapper.updateSold(meId, sold, getUserId(authentication));
     }
 }

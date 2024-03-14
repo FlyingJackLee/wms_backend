@@ -1,6 +1,7 @@
 package com.lizumin.wms.controller;
 
 import com.lizumin.wms.aop.RequestRateLimit;
+import com.lizumin.wms.entity.ApiRes;
 import com.lizumin.wms.entity.User;
 import com.lizumin.wms.service.MailService;
 import com.lizumin.wms.service.RedisOperatorImpl;
@@ -10,6 +11,7 @@ import com.lizumin.wms.tool.MessageUtil;
 import com.lizumin.wms.tool.Verify;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -118,6 +120,7 @@ public class UserController {
         this.userService.resetPassword(email, password);
         return ResponseEntity.ok ("success");
     }
+
 
     /**
      * Generate random code

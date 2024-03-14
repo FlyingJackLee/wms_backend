@@ -1,6 +1,6 @@
 package com.lizumin.wms.handler;
 
-import com.lizumin.wms.exception.ControllerExceptionType;
+import com.lizumin.wms.entity.ApiRes;
 import com.lizumin.wms.tool.MessageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,11 +9,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import com.lizumin.wms.exception.ControllerException;
 
 @RestControllerAdvice
 @Configuration
@@ -27,9 +26,9 @@ public class ControllerExceptionHandler {
      * @return
      */
     @ExceptionHandler({DuplicateKeyException.class})
-    public ResponseEntity<String> handler(DuplicateKeyException e) {
+    public ResponseEntity<ApiRes> handler(DuplicateKeyException e) {
         log.trace(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MessageUtil.getMessageByContext("BPV-016"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiRes.fail(MessageUtil.getMessageByContext("BPV-016")));
     }
 
     /**
@@ -37,9 +36,9 @@ public class ControllerExceptionHandler {
      *
      */
     @ExceptionHandler({MissingServletRequestParameterException.class})
-    public ResponseEntity<String> handler(MissingServletRequestParameterException e) {
+    public ResponseEntity<ApiRes> handler(MissingServletRequestParameterException e) {
         log.trace(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MessageUtil.getMessageByContext("BPV-000"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiRes.fail(MessageUtil.getMessageByContext("BPV-000")));
     }
 
     /**
@@ -47,9 +46,15 @@ public class ControllerExceptionHandler {
      *
      */
     @ExceptionHandler({DataIntegrityViolationException.class})
-    public ResponseEntity<String> handler(DataIntegrityViolationException e) {
+    public ResponseEntity<ApiRes> handler(DataIntegrityViolationException e) {
         log.trace(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MessageUtil.getMessageByContext("BPV-017"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiRes.fail(MessageUtil.getMessageByContext("BPV-017")));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiRes> handler(AccessDeniedException e) {
+        log.trace(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiRes.fail(MessageUtil.getMessageByContext("BPV-018")));
     }
 
     /**

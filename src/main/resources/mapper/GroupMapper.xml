@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lizumin.wms.dao.GroupMapper">
+   <resultMap id="GroupResultMap" type="com.lizumin.wms.entity.Group">
+      <result property="id" column="group_id"/>
+      <result property="storeName" column="store_name"/>
+      <result property="address" column="address"/>
+      <result property="contact" column="contact"/>
+   </resultMap>
+
+   <select id="getGroupByUserId" resultMap="GroupResultMap">
+      SELECT * FROM groups WHERE group_id = (SELECT users.group_id FROM users WHERE id = #{user_id});
+   </select>
+
+   <update id="updateGroup">
+      UPDATE users SET group_id = #{group_id} WHERE id = #{user_id};
+   </update>
+
+   <select id="insertGroup">
+      INSERT INTO groups(store_name, address, contact, create_time) VALUES (#{store_name}, #{address}, #{contact}, #{create_time})
+      RETURNING group_id;
+   </select>
+
+<!--   下面为group_request表操作-->
+   <insert id="insertRequest">
+      INSERT INTO group_request(user_id, group_id) VALUES (#{user_id}, #{group_id});
+   </insert>
+
+   <delete id="deleteRequest">
+      DELETE FROM group_request WHERE user_id = #{user_id};
+   </delete>
+
+   <select id="getGroupByUserIdInRequest" resultMap="GroupResultMap">
+      SELECT t2.group_id, t2.store_name, t2.address, t2.contact
+      FROM group_request t1 left join groups t2 on t1.group_id = t2.group_id
+      WHERE t1.user_id = #{user_id};
+   </select>
+
+   <select id="getRequestUsersByGroupId">
+      SELECT t2.id, t2.username
+      FROM group_request t1 left join users t2 on t1.user_id = t2.id
+      WHERE t1.group_id = #{group_id};
+   </select>
+</mapper>

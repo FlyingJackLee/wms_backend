@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lizumin.wms.dao.AuthorityMapper">
+    <insert id="insertAuthority">
+        INSERT INTO authorities(user_id, authority) values (#{user_id}, #{authority}) ON CONFLICT do nothing;
+    </insert>
+
+    <select id="getRole" resultMap="SystemAuthorityResultMap">
+        SELECT authority FROM authorities WHERE user_id = #{user_id} AND starts_with(authority, 'ROLE') limit 1;
+    </select>
+
+    <update id="updateRole">
+        UPDATE authorities SET authority = #{role} WHERE user_id = #{user_id} and starts_with(authority, 'ROLE')
+    </update>
+
+    <select id="getPermissions" resultMap="SystemAuthorityResultMap">
+        SELECT authority FROM authorities WHERE user_id = #{user_id} AND starts_with(authority, 'PERMISSION');
+    </select>
+
+    <delete id="deletePermission">
+        DELETE FROM authorities WHERE starts_with(#{permission}, 'PERMISSION') AND user_id = #{user_id} AND authority = #{permission};
+    </delete>
+
+    <select id="getAuthorities" resultMap="SystemAuthorityResultMap">
+        SELECT authority FROM authorities WHERE user_id = #{user_id};
+    </select>
+
+    <resultMap id="SystemAuthorityResultMap" type="com.lizumin.wms.entity.SystemAuthority">
+        <result column="authority" property="authority" />
+    </resultMap>
+</mapper>

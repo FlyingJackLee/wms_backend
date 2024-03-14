@@ -1,7 +1,8 @@
 package com.lizumin.wms.service;
 
+import com.lizumin.wms.dao.AuthorityMapper;
 import com.lizumin.wms.dao.UserMapper;
-import com.lizumin.wms.entity.SimpleAuthority;
+import com.lizumin.wms.entity.SystemAuthority;
 import com.lizumin.wms.entity.User;
 import com.lizumin.wms.exception.UserNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -23,6 +24,8 @@ import static org.mockito.Mockito.*;
 public class UserServiceTest {
     private UserMapper userMapper;
 
+    private AuthorityMapper authorityMapper;
+
     private UserCache userCache;
 
     private UserService userService;
@@ -42,7 +45,9 @@ public class UserServiceTest {
 
         passwordEncoder = Mockito.mock(PasswordEncoder.class);
 
-        userService = new UserService(userMapper, userCache, passwordEncoder);
+        authorityMapper = Mockito.mock(AuthorityMapper.class);
+
+        userService = new UserService(userMapper, userCache, passwordEncoder, authorityMapper);
     }
 
     /**
@@ -90,6 +95,16 @@ public class UserServiceTest {
         when(userCache.getUserFromCache("test")).thenReturn(null);
         when(userMapper.getUserByUsername("test")).thenReturn(new User());
         assertThat(userService.lazyLoadUserByUsername("test"), notNullValue());
+    }
+
+    /**
+     * getUserByID测试
+     *
+     */
+    @Test
+    public void should_get_user_with_id() {
+        this.userService.getUserByID(1);
+        verify(this.userMapper).getUserById(1);
     }
 
     /**
@@ -154,8 +169,8 @@ public class UserServiceTest {
     public void should_return_id_when_insert_a_valid_user() {
         // 1. 不插入email, phone
         Set<GrantedAuthority> authorities = new HashSet<>(2);
-        authorities.add(new SimpleAuthority("ROLE_ADMIN"));
-        authorities.add(new SimpleAuthority("WRITE_ONLY"));
+        authorities.add(new SystemAuthority("ROLE_ADMIN"));
+        authorities.add(new SystemAuthority("WRITE_ONLY"));
         User user = new User.Builder().username("test001").password("test001").authorities(authorities).build();
 
         doAnswer(answer -> {
@@ -167,7 +182,6 @@ public class UserServiceTest {
         int result = userService.insertUser(user);
         assertThat(result, is(5));
         verify(userMapper, times(1)).insertUser(any());
-        verify(userMapper, times(2)).insertAuthority(anyInt() ,any());
 
         // 2. 只插入email
         result = userService.insertUser(user, "a@a.com", null);

@@ -1,10 +1,24 @@
+-- 注意自增序！！！不要！！！手动插入id，否则会导致mybatis insert获取id时发生错误，这里的group默认组为特殊情况，不可模仿
+INSERT INTO groups(group_id, store_name, address) VALUES (0, '默认', '默认地址');
+INSERT INTO groups(store_name, address) VALUES ('默认', '默认地址');
+
 INSERT INTO users(username, password) VALUES ('test001', '$2a$10$4ESEs548mQfkBe1v.yVJ0eBvh1QmocYJCC.UN8lDVEmLG6RgWN1x6');
 INSERT INTO users_detail(user_id, email, phone_number) VALUES (currval(pg_get_serial_sequence('users','id')), 'test@test.com', '13012341234');
-INSERT INTO authorities(user_id, authority) VALUES (currval(pg_get_serial_sequence('users','id')), 'ROLE_USER');
+INSERT INTO authorities(user_id, authority) VALUES (currval(pg_get_serial_sequence('users','id')), 'ROLE_DEFAULT');
 
 INSERT INTO users(username, password) VALUES ('testmodified', '$2a$10$4ESEs548mQfkBe1v.yVJ0eBvh1QmocYJCC.UN8lDVEmLG6RgWN1x6');
 INSERT INTO users_detail(user_id, email, phone_number) VALUES (currval(pg_get_serial_sequence('users','id')), 'testmodified@test.com', '13212341234');
-INSERT INTO authorities(user_id, authority) VALUES (currval(pg_get_serial_sequence('users','id')), 'ROLE_USER');
+INSERT INTO authorities(user_id, authority) VALUES (currval(pg_get_serial_sequence('users','id')), 'DEFAULT_STAFF');
+INSERT INTO authorities(user_id, authority) VALUES (currval(pg_get_serial_sequence('users','id')), 'PERMISSION:shopping');
+INSERT INTO authorities(user_id, authority) VALUES (currval(pg_get_serial_sequence('users','id')), 'PERMISSION:inventory');
+UPDATE users SET group_id = 1 WHERE id = currval(pg_get_serial_sequence('users','id'));
+
+INSERT INTO users(username, password) VALUES ('testunit', '$2a$10$4ESEs548mQfkBe1v.yVJ0eBvh1QmocYJCC.UN8lDVEmLG6RgWN1x6');
+INSERT INTO users_detail(user_id, email, phone_number) VALUES (currval(pg_get_serial_sequence('users','id')), 'test002@test.com', '13212341236');
+INSERT INTO authorities(user_id, authority) VALUES (currval(pg_get_serial_sequence('users','id')), 'DEFAULT_STAFF');
+INSERT INTO authorities(user_id, authority) VALUES (currval(pg_get_serial_sequence('users','id')), 'PERMISSION:shopping');
+INSERT INTO authorities(user_id, authority) VALUES (currval(pg_get_serial_sequence('users','id')), 'PERMISSION:inventory');
+UPDATE users SET group_id = 1 WHERE id = currval(pg_get_serial_sequence('users','id'));
 
 INSERT INTO category(parent_cate_id, name, own_id) values (0, '华为/HUAWEI', 1);
 INSERT INTO category(parent_cate_id, name, own_id) values (0, 'OPPO', 1);
@@ -54,7 +68,6 @@ INSERT INTO merchandise(cate_id, cost, price, imei, create_time, own_id)
 values (14, 2000.00, 2399.00 , 123456789000012,'2024-02-12  10:23:54'  , 1);
 INSERT INTO merchandise(cate_id, cost, price, sold, imei, create_time, own_id)
 values (14, 2000.00, 2399.00, true , 123456789000013,'2024-02-12  10:23:54'  , 1);
-
 
 
 INSERT INTO notices (type, publish_time, content) VALUES ('update', '2024-03-13 23:29:05.000000', '测试内容');

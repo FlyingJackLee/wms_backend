@@ -38,7 +38,7 @@ public class OrderService extends AbstractAuthenticationService {
         Assert.isTrue(meId > 0, "invalid id");
         Assert.isTrue(checkMePermission(authentication, meId), "dont have permission");
 
-        int ownId = getOwnerId(authentication);
+        int ownId = getUserId(authentication);
         int id = this.orderMapper.insertOrder(meId, sellingPrice, remark, date, ownId); // 创建订单
         this.merchandiseService.updateSold(authentication, meId, true); // 更新商品销售状态
         return id;
@@ -68,7 +68,7 @@ public class OrderService extends AbstractAuthenticationService {
     public List<Order> getOrdersByDateRange(Authentication authentication, Date sellingTimeStart, Date sellingTimeEnd) {
         long diff = sellingTimeEnd.getTime() - sellingTimeStart.getTime();
         Assert.isTrue(diff <= 31708800000L, "limit date range in 1 year"); // 范围不能超过367天
-        return this.orderMapper.getOrdersByDateRange(getOwnerId(authentication), sellingTimeStart, sellingTimeEnd);
+        return this.orderMapper.getOrdersByDateRange(getUserId(authentication), sellingTimeStart, sellingTimeEnd);
     }
 
     /**
@@ -81,8 +81,8 @@ public class OrderService extends AbstractAuthenticationService {
     public void returnOrder(Authentication authentication, int orderId) {
         Assert.isTrue(orderId > 0, "invalid order id");
         // 商品设置为未销售
-        this.merchandiseService.updateSold(authentication, this.orderMapper.getOrderById(orderId, getOwnerId(authentication)).getMerchandise().getId(), false);
-        this.orderMapper.setOrderReturned(orderId, true, getOwnerId(authentication));
+        this.merchandiseService.updateSold(authentication, this.orderMapper.getOrderById(orderId, getUserId(authentication)).getMerchandise().getId(), false);
+        this.orderMapper.setOrderReturned(orderId, true, getUserId(authentication));
     }
 
     private boolean checkMePermission(Authentication authentication,  int meId) {

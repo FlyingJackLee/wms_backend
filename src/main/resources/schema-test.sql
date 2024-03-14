@@ -3,24 +3,43 @@ DROP TABLE IF EXISTS authorities cascade;
 DROP TABLE IF EXISTS merchandise cascade;
 DROP TABLE IF EXISTS orders cascade;
 DROP TABLE IF EXISTS category cascade;
+DROP TABLE IF EXISTS groups cascade;
 DROP TABLE IF EXISTS users cascade;
+DROP TABLE IF EXISTS group_request cascade;
 
+CREATE TABLE groups(
+     group_id serial primary key not null UNIQUE,
+     store_name varchar(100) null ,
+     address varchar(200) null ,
+     contact varchar(50) null,
+     create_time timestamp not null DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE users(
-        id serial primary key not null UNIQUE ,
-        username varchar(50) not null UNIQUE CHECK (length(username) >= 5),
-        password varchar(500) not null CHECK ( length(password) >= 8 ),
-        accountNonExpired boolean default true,
-        accountNonLocked boolean default true,
-        credentialsNonExpired boolean default true,
-        enabled boolean default true
+    id serial primary key not null UNIQUE ,
+    username varchar(50) not null UNIQUE CHECK (length(username) >= 5),
+    password varchar(500) not null CHECK ( length(password) >= 8 ),
+    accountNonExpired boolean default true,
+    accountNonLocked boolean default true,
+    credentialsNonExpired boolean default true,
+    enabled boolean default true,
+    group_id integer not null default 0,
+    constraint fk_user_groups foreign key(group_id) references groups(group_id)
+);
+
+CREATE TABLE group_request(
+    group_id integer not null,
+--      用户一次只能提交一个申请
+    user_id integer not null UNIQUE,
+    constraint fk_request_users foreign key(user_id) references users(id),
+    constraint fk_request_groups foreign key(group_id) references groups(group_id)
 );
 
 CREATE TABLE users_detail(
-        user_id integer not null unique,
-        email email null unique,
-        phone_number cn_phone_number null unique,
-        constraint fk_users_detail_users foreign key(user_id) references users(id)
+                             user_id integer not null unique,
+                             email email null unique,
+                             phone_number cn_phone_number null unique,
+                             constraint fk_users_detail_users foreign key(user_id) references users(id)
 );
 
 CREATE TABLE authorities (
@@ -30,6 +49,14 @@ CREATE TABLE authorities (
 );
 CREATE UNIQUE INDEX ix_auth_username on authorities (user_id,authority);
 
+
+
+CREATE TABLE IF NOT EXISTS receipts(
+       re_id serial primary key not null UNIQUE,
+       remark varchar(200) null,
+       group_id integer not null,
+       constraint fk_receipts_groups foreign key(group_id) references groups(group_id)
+);
 
 CREATE TABLE category(
                          cate_id serial primary key not null UNIQUE,

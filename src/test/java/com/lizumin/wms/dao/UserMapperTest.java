@@ -1,6 +1,6 @@
 package com.lizumin.wms.dao;
 
-import com.lizumin.wms.entity.SimpleAuthority;
+import com.lizumin.wms.entity.SystemAuthority;
 import com.lizumin.wms.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,6 +34,30 @@ public class UserMapperTest {
         assertThat(result, nullValue());
 
         result = this.userMapper.getUserByUsername(null);
+        assertThat(result, nullValue());
+    }
+
+    /**
+     * 查找User测试
+     *
+     */
+    @Test
+    public void should_get_user_when_username_exist_in_db() {
+        User result = this.userMapper.getUserByUsername("test001");
+        assertThat(result.getUsername(), equalTo("test001"));
+        assertThat(result.getGroup().getId(), is(0)); // 默认为0 缺省组
+    }
+
+    /**
+     * getUserById测试
+     *
+     */
+    @Test
+    public void should_get_user_with_id() {
+        User result = this.userMapper.getUserById(1);
+        assertThat(result.getUsername(), equalTo("test001"));
+
+        result = this.userMapper.getUserById(99);
         assertThat(result, nullValue());
     }
 
@@ -74,16 +98,6 @@ public class UserMapperTest {
 
         result = this.userMapper.getUsernameByPhoneNumber("1234");
         assertThat(result, nullValue());
-    }
-
-    /**
-     * 查找User测试
-     *
-     */
-    @Test
-    public void should_get_user_when_username_exist_in_db() {
-        User result = this.userMapper.getUserByUsername("test001");
-        assertThat(result.getUsername(), equalTo("test001"));
     }
 
     /**
@@ -159,33 +173,6 @@ public class UserMapperTest {
         // missing password： throw DataIntegrityViolationException
         final User userMissingPassword = new User.Builder().username("test003").password("").build();
         Assertions.assertThrows(DataIntegrityViolationException.class, () -> this.userMapper.insertUser(userMissingPassword));
-    }
-
-    /**
-     * 测试user不存在或者输入不合法时插入authority
-     *
-     */
-    @Test
-    public void should_not_insert_authority_when_user_id_not_exist_or_authority_empty() {
-        // user id not exist: throw DataIntegrityViolationException
-        Assertions.assertThrows(DataIntegrityViolationException.class, () -> this.userMapper.insertAuthority(-1, "test_authority"));
-
-        // authority empty: throw DataIntegrityViolationException
-        Assertions.assertThrows(DataIntegrityViolationException.class, () -> this.userMapper.insertAuthority(1, ""));
-        Assertions.assertThrows(DataIntegrityViolationException.class, () -> this.userMapper.insertAuthority(1, null));
-    }
-
-    /**
-     * 正常插入authority
-     *
-     */
-    @Test
-    public void should_insert_authority_when_user_id_exist() {
-        this.userMapper.insertAuthority(1, "test_authority");
-        User user = this.userMapper.getUserByUsername("test001");
-        AtomicBoolean exist = new AtomicBoolean(false);
-        user.getAuthorities().forEach(authority -> exist.set(authority.equals(new SimpleAuthority("test_authority"))));
-        assertThat(exist.get(), is(true));
     }
 
     /**
