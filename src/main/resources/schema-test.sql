@@ -35,13 +35,14 @@ CREATE TABLE group_request(
     constraint fk_request_groups foreign key(group_id) references groups(group_id)
 );
 
-CREATE TABLE users_detail(
-                             user_id integer not null unique,
-                             email email null unique,
-                             phone_number cn_phone_number null unique,
-                             constraint fk_users_detail_users foreign key(user_id) references users(id)
+CREATE TABLE IF NOT EXISTS users_detail(
+   user_id integer not null unique,
+   nickname varchar(20) null default '默认名称',
+   email email null unique,
+   phone_number cn_phone_number null unique,
+   avatar varchar(500) default 'default',
+   constraint fk_users_detail_users foreign key(user_id) references users(id)
 );
-
 CREATE TABLE authorities (
                              user_id integer not null,
                              authority varchar(50) not null CHECK ( length(authority) >= 3 ),

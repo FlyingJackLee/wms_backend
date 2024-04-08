@@ -2,9 +2,7 @@ package com.lizumin.wms.entity;
 
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class SystemAuthority implements GrantedAuthority {
     public enum Role {
@@ -90,6 +88,24 @@ public class SystemAuthority implements GrantedAuthority {
         Set<GrantedAuthority> authorities = new HashSet<>();
         authorities.add(new SystemAuthority(Role.DEFAULT.value()));
         return authorities;
+    }
+
+    /**
+     * 生成权限组
+     *
+     */
+    public static List<SystemAuthority> permissions(boolean shopping, boolean inventory, boolean statistics){
+        List<SystemAuthority> permissions = new ArrayList<>(3);
+        if (shopping) {
+            permissions.add(new SystemAuthority(Permission.SHOPPING.value()));
+        }
+        if (inventory) {
+            permissions.add(new SystemAuthority(Permission.INVENTORY.value()));
+        }
+        if (statistics) {
+            permissions.add(new SystemAuthority(Permission.STATISTICS.value()));
+        }
+        return permissions;
     }
 
     /**

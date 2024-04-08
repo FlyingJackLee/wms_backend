@@ -98,6 +98,24 @@ public class UserService implements UserDetailsService {
     }
 
     /**
+     * get group id by phone
+     *
+     * @param phone
+     * @return
+     */
+    public int getGroupIdByPhone(String phone){
+        Assert.isTrue(Verify.verifyPhoneNumber(phone), "not a valid phone");
+        Integer groupId = this.userMapper.getGroupIdByPhone(phone);
+
+        // 为null表示未找到返回-1
+        if (groupId == null) {
+            return -1;
+        } else {
+            return (int) groupId;
+        }
+    }
+
+    /**
      * Check if username has been used
      *
      * @param username: not null

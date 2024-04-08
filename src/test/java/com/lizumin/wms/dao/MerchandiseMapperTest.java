@@ -148,9 +148,9 @@ public class MerchandiseMapperTest {
     @Test
     public void should_create_me_and_get_its_id_when_inserting() {
         int id = this.merchandiseMapper.insertMerchandise(12, 999.00, 1500.00,
-                "00000000000000001", new Date(), 1);
+                "00000000000000001", new Date(), 2);
         assertThat(id, greaterThan(2));
-        assertThat(this.merchandiseMapper.getMerchandiseById(id, 1), notNullValue());
+        assertThat(this.merchandiseMapper.getMerchandiseById(id, 2), notNullValue());
     }
 
     /**

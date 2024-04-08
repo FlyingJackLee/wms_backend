@@ -11,11 +11,15 @@
       <result property="contact" column="contact"/>
    </resultMap>
 
+   <select id="getGroupById">
+      SELECT * FROM groups WHERE group_id = #{group_id};
+   </select>
+
    <select id="getGroupByUserId" resultMap="GroupResultMap">
       SELECT * FROM groups WHERE group_id = (SELECT users.group_id FROM users WHERE id = #{user_id});
    </select>
 
-   <update id="updateGroup">
+   <update id="updateGroupOfUser">
       UPDATE users SET group_id = #{group_id} WHERE id = #{user_id};
    </update>
 
@@ -24,7 +28,24 @@
       RETURNING group_id;
    </select>
 
-<!--   下面为group_request表操作-->
+   <update id="updateStoreName">
+      UPDATE groups SET store_name =#{store_name} where group_id = #{group_id};
+   </update>
+
+   <update id="updateAddress">
+      UPDATE groups SET address =#{address} where group_id = #{group_id};
+   </update>
+
+   <update id="updateContact">
+      UPDATE groups SET contact =#{contact} where group_id = #{group_id};
+   </update>
+
+   <select id="getUsersByGroupId">
+      SELECT id as userId, nickname, phone_number, email FROM users t1 left join users_detail t2 ON t1.id = t2.user_id
+      WHERE t1.group_id = #{group_id};
+   </select>
+
+   <!--   下面为group_request表操作-->
    <insert id="insertRequest">
       INSERT INTO group_request(user_id, group_id) VALUES (#{user_id}, #{group_id});
    </insert>
@@ -40,8 +61,7 @@
    </select>
 
    <select id="getRequestUsersByGroupId">
-      SELECT t2.id, t2.username
-      FROM group_request t1 left join users t2 on t1.user_id = t2.id
+      SELECT t1.user_id, nickname, phone_number, email FROM group_request as t1 left join users_detail as t2 ON t1.user_id = t2.user_id
       WHERE t1.group_id = #{group_id};
    </select>
 </mapper>

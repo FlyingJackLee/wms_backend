@@ -2,6 +2,7 @@ package com.lizumin.wms.dao;
 
 import com.lizumin.wms.entity.Group;
 import com.lizumin.wms.entity.User;
+import com.lizumin.wms.entity.UserProfile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ public class GroupMapperTest {
 
         result = this.groupMapper.getGroupByUserId(2);
         assertThat(result.getId(), is(1));
+        assertThat(result.getAddress(), notNullValue());
+        assertThat(result.getContact(), notNullValue());
+        assertThat(result.getCreateTime(), notNullValue());
     }
 
     /**
@@ -46,12 +50,12 @@ public class GroupMapperTest {
      */
     @Test
     public void should_update_group_or_throw() {
-        this.groupMapper.updateGroup(2, 2);
+        this.groupMapper.updateGroupOfUser(2, 2);
         Group result = this.groupMapper.getGroupByUserId(2);
         assertThat(result.getId(), is(2));
 
         Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-            this.groupMapper.updateGroup(2, 999);
+            this.groupMapper.updateGroupOfUser(2, 999);
         });
     }
 
@@ -132,14 +136,65 @@ public class GroupMapperTest {
         User user2 = new User.Builder().username("listtestrequest2").password("test1234").build();
         this.userMapper.insertUser(user1);
         this.userMapper.insertUser(user2);
+        String phoneStub1 = "17000000000";
+        String phoneStub2 = "17000000001";
+        this.userMapper.updatePhone(user1.getId(), phoneStub1);
+        this.userMapper.updatePhone(user2.getId(), phoneStub2);
         int groupId = this.groupMapper.insertGroup("测试5", "测试地址5", "2", new Date());
         this.groupMapper.insertRequest(user1.getId(), groupId);
         this.groupMapper.insertRequest(user2.getId(), groupId);
 
-        List<User> users = this.groupMapper.getRequestUsersByGroupId(groupId);
+        List<UserProfile> users = this.groupMapper.getRequestUsersByGroupId(groupId);
         assertThat(users.size(), is(2));
+        assertThat(users.getFirst().getUserId(), equalTo(user1.getId()));
+        assertThat(users.getFirst().getPhoneNumber(), equalTo(phoneStub1));
+        assertThat(users.getLast().getPhoneNumber(), equalTo(phoneStub2));
+        assertThat(users.getLast().getUserId(), equalTo(user2.getId()));
 
         users = this.groupMapper.getRequestUsersByGroupId(99);
         assertThat(users, empty());
+    }
+
+    /**
+     * getGroupById测试
+     */
+    @Test
+    public void should_get_group_with_id() {
+        assertThat(this.groupMapper.getGroupById(99), nullValue());
+
+        int groupId = this.groupMapper.insertGroup("测试getbyid", "测试地址getbyid", "0", new Date());
+        assertThat(this.groupMapper.getGroupById(groupId).getStoreName(), equalTo("测试getbyid"));
+        assertThat(this.groupMapper.getGroupById(groupId).getAddress(), equalTo("测试地址getbyid"));
+        assertThat(this.groupMapper.getGroupById(groupId).getContact(), equalTo("0"));
+    }
+
+    /**
+     * updateStoreName  updateAddress updateContact测试
+     */
+    @Test
+    public void should_modify_property_when_updating() {
+        int groupId = this.groupMapper.insertGroup("测试update", "测试地址update", "0", new Date());
+        this.groupMapper.updateStoreName(groupId, "测试update_modified");
+        assertThat(this.groupMapper.getGroupById(groupId).getStoreName(), equalTo("测试update_modified"));
+
+        this.groupMapper.updateAddress(groupId, "测试地址update_modified");
+        assertThat(this.groupMapper.getGroupById(groupId).getAddress(), equalTo("测试地址update_modified"));
+
+        this.groupMapper.updateContact(groupId, "1");
+        assertThat(this.groupMapper.getGroupById(groupId).getContact(), equalTo("1"));
+    }
+
+    /**
+     * getUsersByGroupId测试
+     */
+    @Test
+    public void should_get_list_users_by_group_id() {
+        List<UserProfile> users = this.groupMapper.getUsersByGroupId(99);
+        assertThat(users, empty());
+
+        users = this.groupMapper.getUsersByGroupId(1);
+        assertThat(users.size(), greaterThan(0));
+        assertThat(users.getFirst().getUserId(), greaterThan(0));
+        assertThat(users.getFirst().getNickname(), notNullValue());
     }
 }

@@ -2,17 +2,20 @@ package com.lizumin.wms.entity;
 
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
  * @author Zumin Li
  * @date 2024/3/11 22:49
  */
-public class Group {
+public class Group{
     private int id;
     private String storeName;
-    private String address;
-    private String contact;
+    private String address = "";
+    private String contact = "";
+
+    private Date createTime;
 
     public Group() {
     }
@@ -54,6 +57,14 @@ public class Group {
 
     public void setContact(String contact) {
         this.contact = contact;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
     }
 
     @Override

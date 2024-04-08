@@ -47,7 +47,6 @@ public class UserCacheServiceTest {
      */
     @Test
     public void should_insert_and_return_user_when_user_in_cache() {
-        Set<GrantedAuthority> authorities = new HashSet<>(1);
         UserDetails user = new User.Builder().username("test_cache").password("test_cache")
                 .authorities(SystemAuthority.defaults()).build();
         this.userCacheService.putUserInCache(user);

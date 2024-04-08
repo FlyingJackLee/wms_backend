@@ -33,11 +33,11 @@ public class OrderMapperTest {
      */
     @Test
     public void should_throw_exception_when_illegal_paras() {
-        int meId =  merchandiseMapper.insertMerchandise(11, 999, 12989, "ime1", new Date(), 1);
+        int meId =  merchandiseMapper.insertMerchandise(11, 999, 12989, "ime1", new Date(), 2);
 
         // me_id 有误
         Assertions.assertThrows(DataIntegrityViolationException.class, () ->{
-            this.orderMapper.insertOrder(999, 999.0, "备注", new Date(), 1);
+            this.orderMapper.insertOrder(999, 999.0, "备注", new Date(), 2);
         });
 
         // own id 有误
@@ -47,8 +47,8 @@ public class OrderMapperTest {
 
         // 重复销售
         Assertions.assertThrows(DataIntegrityViolationException.class, () ->{
-            this.orderMapper.insertOrder(meId, 999.0, "备注", new Date(),1);
-            this.orderMapper.insertOrder(meId, 999.0, "备注", new Date(),1);
+            this.orderMapper.insertOrder(meId, 999.0, "备注", new Date(),2);
+            this.orderMapper.insertOrder(meId, 999.0, "备注", new Date(),2);
         });
     }
 
@@ -58,10 +58,10 @@ public class OrderMapperTest {
     @Test
     public void should_insert_order() {
         Date date = generateDate(2005,1, 1);
-        int meId =  merchandiseMapper.insertMerchandise(11, 999, 12989, "ime2", new Date(), 1);
-        int id = this.orderMapper.insertOrder(meId, 999.0, "备注", date ,1);
+        int meId =  merchandiseMapper.insertMerchandise(11, 999, 12989, "ime2", new Date(), 2);
+        int id = this.orderMapper.insertOrder(meId, 999.0, "备注", date ,2);
         assertThat(id, greaterThan(0));
-        assertThat(orderMapper.getOrderById(id, 1).getSellingTime(), equalTo(date));
+        assertThat(orderMapper.getOrderById(id, 2).getSellingTime(), equalTo(date));
     }
 
     /**
@@ -71,18 +71,18 @@ public class OrderMapperTest {
     public void should_get_relevant_list_when_get_orders() {
         // 测试数据准备
         Date date1 = generateDate(2000,1,1);
-        int meId =  merchandiseMapper.insertMerchandise(11, 999, 1299, "imeget1", date1, 1);
-        this.orderMapper.insertOrder(meId, 999.0, "备注1", date1 ,1);
+        int meId =  merchandiseMapper.insertMerchandise(11, 999, 1299, "imeget1", date1, 2);
+        this.orderMapper.insertOrder(meId, 999.0, "备注1", date1 ,2);
 
         Date date2 = generateDate(2001,1,1);
-        meId =  merchandiseMapper.insertMerchandise(11, 999, 1299, "imeget2", date2, 1);
-        this.orderMapper.insertOrder(meId, 999.0, "备注2", date2 ,1);
+        meId =  merchandiseMapper.insertMerchandise(11, 999, 1299, "imeget2", date2, 2);
+        this.orderMapper.insertOrder(meId, 999.0, "备注2", date2 ,2);
 
         Date date3 = generateDate(2001,1,2);
-        meId =  merchandiseMapper.insertMerchandise(11, 799, 1099, "imeget3", date3, 1);
-        this.orderMapper.insertOrder(meId, 999.0, "备注3", date3 ,1);
+        meId =  merchandiseMapper.insertMerchandise(11, 799, 1099, "imeget3", date3, 2);
+        this.orderMapper.insertOrder(meId, 999.0, "备注3", date3 ,2);
 
-        List<Order> orders = this.orderMapper.getOrdersByDateRange(1, date1, date2);
+        List<Order> orders = this.orderMapper.getOrdersByDateRange(2, date1, date2);
         assertThat(orders.size(), is(2));
         assertThat(orders.getFirst().getMerchandise(), notNullValue());
         assertThat(orders.getFirst().getRemark(), notNullValue());
@@ -90,7 +90,7 @@ public class OrderMapperTest {
         assertThat(orders.getFirst().getId(), greaterThan(0));
         assertThat(orders.getFirst().getMerchandise().getCategory(), notNullValue());
 
-        List<Order> emptyOrders = this.orderMapper.getOrdersByDateRange(1, generateDate(1900, 1, 1), generateDate(1901, 1, 1));
+        List<Order> emptyOrders = this.orderMapper.getOrdersByDateRange(2, generateDate(1900, 1, 1), generateDate(1901, 1, 1));
         assertThat(emptyOrders, empty());
     }
 
@@ -99,12 +99,12 @@ public class OrderMapperTest {
      */
     @Test
     public void should_update_returned() {
-        int meId =  merchandiseMapper.insertMerchandise(11, 999, 1299, "imeiupdate", new Date(), 1);
-        int id = this.orderMapper.insertOrder(meId, 999.0, "备注1", new Date() ,1);
-        this.orderMapper.setOrderReturned(id, true, 1);
-        assertThat(this.orderMapper.getOrderById(id, 1).isReturned(), is(true));
-        this.orderMapper.setOrderReturned(id, false, 1);
-        assertThat(this.orderMapper.getOrderById(id, 1).isReturned(), is(false));
+        int meId =  merchandiseMapper.insertMerchandise(11, 999, 1299, "imeiupdate", new Date(), 2);
+        int id = this.orderMapper.insertOrder(meId, 999.0, "备注1", new Date() ,2);
+        this.orderMapper.setOrderReturned(id, true, 2);
+        assertThat(this.orderMapper.getOrderById(id, 2).isReturned(), is(true));
+        this.orderMapper.setOrderReturned(id, false, 2);
+        assertThat(this.orderMapper.getOrderById(id, 2).isReturned(), is(false));
     }
 
     private Date generateDate(int year, int month, int day) {

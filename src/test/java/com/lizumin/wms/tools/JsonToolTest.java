@@ -18,8 +18,7 @@ import static com.lizumin.wms.tool.JsonTool.jsonToObj;
 
 public class JsonToolTest {
     private static User user;
-    private static String userJson = "{\"id\":1,\"password\":\"12346\",\"username\":null,\"enabled\":true,\"accountNonExpired\":true,\"accountNonLocked\":true,\"credentialsNonExpired\":true,\"authorities\":[{\"@class\":\"com.lizumin.wms.entity.SystemAuthority\",\"authority\":\"ROLE_ADMIN\"},{\"@class\":\"com.lizumin.wms.entity.SystemAuthority\",\"authority\":\"READ_ONLY\"}],\"group\":{\"id\":0,\"storeName\":null,\"address\":null,\"contact\":null}}";
-
+    private static String userJson = "{\"id\":1,\"password\":\"12346\",\"username\":null,\"enabled\":true,\"accountNonExpired\":true,\"accountNonLocked\":true,\"credentialsNonExpired\":true,\"authorities\":[{\"@class\":\"com.lizumin.wms.entity.SystemAuthority\",\"authority\":\"ROLE_ADMIN\"},{\"@class\":\"com.lizumin.wms.entity.SystemAuthority\",\"authority\":\"READ_ONLY\"}],\"group\":{\"id\":0,\"storeName\":null,\"address\":\"\",\"contact\":\"\",\"createTime\":null}}";
     @BeforeAll
     public static void setUp(){
         Set<GrantedAuthority> authorities = new HashSet<>(2);

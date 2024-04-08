@@ -108,6 +108,26 @@ public class UserServiceTest {
     }
 
     /**
+     * getGroupIdByPhone测试
+     */
+    @Test
+    public void should_throw_or_get_group_id() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            this.userService.getGroupIdByPhone("notaphone");
+        });
+
+        String testPhone = "13888888888";
+        when(this.userMapper.getGroupIdByPhone(testPhone)).thenReturn(null);
+        int result = this.userService.getGroupIdByPhone(testPhone);
+        assertThat(result, is(-1));
+
+        when(this.userMapper.getGroupIdByPhone(testPhone)).thenReturn(Integer.parseInt("4"));
+        result = this.userService.getGroupIdByPhone(testPhone);
+        verify(this.userMapper, atLeastOnce()).getGroupIdByPhone(testPhone);
+        assertThat(result, is(4));
+    }
+
+    /**
      * getUsernameByEmail/getUsernameByPhoneNumber测试
      *
      */

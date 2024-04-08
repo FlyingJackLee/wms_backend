@@ -56,6 +56,19 @@
                         values (#{username}, #{password}, #{enabled}, #{accountNonExpired}, #{accountNonLocked}, #{credentialsNonExpired});
     </insert>
 
+    <select id="getGroupIdByPhone">
+        SELECT group_id from users WHERE id = (SELECT user_id FROM users_detail WHERE phone_number = #{phone_number});
+    </select>
+
+    <update id="updatePasswordByEmail">
+        UPDATE users SET password=#{password} WHERE id =
+        (SELECT user_id FROM users_detail WHERE email = #{email});
+    </update>
+
+    <select id="getProfile">
+        SELECT * FROM users_detail WHERE user_id = #{user_id};
+    </select>
+
     <insert id="updateEmail">
         UPDATE users_detail SET email=#{email} where user_id = #{user_id};
         INSERT INTO users_detail(user_id, email) SELECT #{user_id}, #{email} WHERE NOT EXISTS (SELECT 1 FROM users_detail WHERE user_id = #{user_id});
@@ -66,8 +79,8 @@
         INSERT INTO users_detail(user_id, phone_number) SELECT #{user_id}, #{phone} WHERE NOT EXISTS (SELECT 1 FROM users_detail WHERE user_id = #{user_id});
     </insert>
 
-    <update id="updatePasswordByEmail">
-        UPDATE users SET password=#{password} WHERE id =
-        (SELECT user_id FROM users_detail WHERE email = #{email});
-    </update>
+    <insert id="updateNickname">
+        UPDATE users_detail SET nickname=#{nickname} where user_id = #{user_id};
+        INSERT INTO users_detail(user_id, nickname) SELECT #{user_id}, #{nickname} WHERE NOT EXISTS (SELECT 1 FROM users_detail WHERE user_id = #{user_id});
+    </insert>
 </mapper>

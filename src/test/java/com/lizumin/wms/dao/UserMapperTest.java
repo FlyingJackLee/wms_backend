@@ -1,6 +1,5 @@
 package com.lizumin.wms.dao;
 
-import com.lizumin.wms.entity.SystemAuthority;
 import com.lizumin.wms.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,8 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -193,6 +190,17 @@ public class UserMapperTest {
         assertThat(this.userMapper.getUsernameByEmail("testdetail@test.com"), notNullValue());
     }
 
+    /**
+     * getGroupIdByPhone测试
+     */
+    @Test
+    public void should_get_group_id_when_query() {
+        Integer result = this.userMapper.getGroupIdByPhone("13212341234");
+        assertThat(result, equalTo(1));
+
+        result = this.userMapper.getGroupIdByPhone("9999999996");
+        assertThat(result, nullValue());
+    }
 
     /**
      * 正常插入email/phone
@@ -224,5 +232,31 @@ public class UserMapperTest {
 
         User modifedUser = this.userMapper.getUserByUsername(user.getUsername());
         assertThat(modifedUser.getPassword(), equalTo("resettest123"));
+    }
+
+    /**
+     * getProfile测试
+     */
+    public void should_get_null_or_detail() {
+        User user = new User.Builder().username("getprofiletest").password("test1234").build();
+        this.userMapper.insertUser(user);
+        assertThat(this.userMapper.getProfile(user.getId()), nullValue());
+
+        this.userMapper.updateEmail(user.getId(), "getprofiletest@test.com");
+        assertThat(this.userMapper.getProfile(user.getId()).getEmail(), equalTo("getprofiletest@test.com"));
+    }
+
+    /**
+     * updateNickname测试
+     *
+     */
+    @Test
+    public void should_throw_exception_or_update_nickname() {
+        User user = new User.Builder().username("nicknametest").password("test1234").build();
+        this.userMapper.insertUser(user);
+
+        this.userMapper.updateNickname(user.getId(), "nicktest");
+
+        assertThat(this.userMapper.getProfile(user.getId()).getNickname(), equalTo("nicktest"));
     }
 }

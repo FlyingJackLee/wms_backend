@@ -44,8 +44,10 @@ CREATE TABLE IF NOT EXISTS receipts(
 
 CREATE TABLE IF NOT EXISTS users_detail(
     user_id integer not null unique,
+    nickname varchar(20) null default '默认名称',
     email email null unique,
     phone_number cn_phone_number null unique,
+    avatar varchar(500) default 'default',
     constraint fk_users_detail_users foreign key(user_id) references users(id)
 );
 
@@ -110,4 +112,3 @@ CREATE TABLE IF NOT EXISTS notices(
 );
 
 INSERT INTO groups(group_id, store_name, address) VALUES (0, '默认', '默认地址');
-INSERT INTO users(username, password) VALUES('test001', '$2a$10$MspOWt.AfeRVxWlDATHBm.FZ7ApCdEaIMIW.NqHzAJBWWiTXU2Oim');
