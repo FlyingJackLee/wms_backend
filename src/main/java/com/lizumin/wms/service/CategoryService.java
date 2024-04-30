@@ -3,7 +3,7 @@ package com.lizumin.wms.service;
 import com.lizumin.wms.dao.CategoryMapper;
 import com.lizumin.wms.entity.Category;
 import com.lizumin.wms.tool.Verify;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -25,24 +25,24 @@ public class CategoryService extends AbstractAuthenticationService {
     }
 
     /**
-     * 获取所有根分类
+     * 获取所有根分类 -- 至少是员工才能获取
      *
-     * @return
      */
-    public List<Category> getRootCategories(Authentication authentication) {
-        return this.categoryMapper.getCategoriesByParentId(0, getUserId(authentication));
+    @PreAuthorize("hasRole('STAFF')")
+    public List<Category> getRootCategories() {
+        return this.categoryMapper.getCategoriesByParentId(0, getGroupId());
     }
 
     /**
      * 通过id获取cate
      *
-     * @param authentication
      * @param id
      * @return
      */
-    public Category getCategory(Authentication authentication, int id){
+    @PreAuthorize("hasRole('STAFF')")
+    public Category getCategory(int id){
         Assert.isTrue(id > 0, "id should be larger than 0");
-        return this.categoryMapper.getCategoryById(id, getUserId(authentication));
+        return this.categoryMapper.getCategoryById(id, getGroupId());
     }
 
     /**
@@ -51,9 +51,10 @@ public class CategoryService extends AbstractAuthenticationService {
      * @param parentId
      * @return
      */
-    public List<Category> getCategoriesByParentId(Authentication authentication, int parentId) {
+    @PreAuthorize("hasRole('STAFF')")
+    public List<Category> getCategoriesByParentId(int parentId) {
         Assert.isTrue(parentId >= 0, "parent_id should be larger than or equal 0");
-        return this.categoryMapper.getCategoriesByParentId(parentId, getUserId(authentication));
+        return this.categoryMapper.getCategoriesByParentId(parentId, getGroupId());
     }
 
     /**
@@ -63,23 +64,23 @@ public class CategoryService extends AbstractAuthenticationService {
      * @param name
      * @return
      */
-    public int insertCategory(Authentication authentication, int parentID, String name) {
+    @PreAuthorize("hasRole('STAFF')")
+    public int insertCategory(int parentID, String name) {
         Assert.isTrue(parentID >= 0, "parent_id should be larger than 0");
         Assert.isTrue(Verify.isNotBlank(name), "category must have a name");
-        return this.categoryMapper.insertCategory(parentID, name, getUserId(authentication));
+        return this.categoryMapper.insertCategory(parentID, name, getUserId(), getGroupId());
     }
 
     /**
      * 删除cate
      *
-     * @param authentication
      * @param id
      */
     @Transactional
-    public void deleteCategory(Authentication authentication, int id){
+    public void deleteCategory(int id){
         Assert.isTrue(id >= 1, "id should be larger than 0");
         // 先删除子类 在删除父类
-        this.categoryMapper.deleteCategoryByParentId(id, getUserId(authentication));
-        this.categoryMapper.deleteCategory(id, getUserId(authentication));
+        this.categoryMapper.deleteCategoryByParentId(id, getGroupId());
+        this.categoryMapper.deleteCategory(id, getGroupId());
     }
 }

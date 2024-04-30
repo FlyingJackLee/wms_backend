@@ -85,15 +85,15 @@ public class CategoryMapperTest {
     @Test
     public void should_throw_error_when_input_same_category() {
         Assertions.assertThrows(DuplicateKeyException.class,() -> {
-             categoryMapper.insertCategory(0, "VIVO", 1);
+             categoryMapper.insertCategory(0, "VIVO", 1, 1);
         });
 
         Assertions.assertThrows(DuplicateKeyException.class,() -> {
-            categoryMapper.insertCategory(3, "X100", 1);
+            categoryMapper.insertCategory(3, "X100", 2, 1);
         });
 
         Assertions.assertThrows(DataIntegrityViolationException.class,() -> {
-            categoryMapper.insertCategory(-1, "X100", 1);
+            categoryMapper.insertCategory(-1, "X100", 1, 1);
         });
     }
 
@@ -102,7 +102,7 @@ public class CategoryMapperTest {
      */
     @Test
     public void should_insert_category_when_give_a_valid_category() {
-        int i = categoryMapper.insertCategory(0, "test", 1);
+        int i = categoryMapper.insertCategory(0, "test", 1, 1);
         assertThat(i, greaterThan(1));
     }
 
@@ -115,8 +115,8 @@ public class CategoryMapperTest {
             categoryMapper.updateName(3, "OPPO", 1);
         });
 
-        categoryMapper.insertCategory(2, "dup_test", 1);
-        int id = categoryMapper.insertCategory(3, "dup_test", 1);
+        categoryMapper.insertCategory(2, "dup_test", 1, 1);
+        int id = categoryMapper.insertCategory(3, "dup_test", 1, 1);
 
         Assertions.assertThrows(DuplicateKeyException.class,() -> {
             categoryMapper.updateParentId(id, 2, 1);
@@ -128,7 +128,7 @@ public class CategoryMapperTest {
      */
     @Test
     public void should_update_category_when_category_is_valid() {
-        int id = categoryMapper.insertCategory(1, "valid_update_test", 1);
+        int id = categoryMapper.insertCategory(1, "valid_update_test", 1, 1);
 
         categoryMapper.updateParentId(id, 2, 1);
         assertThat(categoryMapper.getCategoryById(id, 1).getParentId(), is(2));
@@ -142,7 +142,7 @@ public class CategoryMapperTest {
      */
     @Test
     public void should_delete_category() {
-        int id = categoryMapper.insertCategory(1, "delete_test", 1);
+        int id = categoryMapper.insertCategory(1, "delete_test", 1, 1);
         categoryMapper.deleteCategory(id, 1);
         assertThat(categoryMapper.getCategoryById(id, 1), nullValue());
     }
@@ -152,10 +152,10 @@ public class CategoryMapperTest {
      */
     @Test
     public void should_delete_children_category() {
-        int id = categoryMapper.insertCategory(1, "children_delete_test", 1);
-        categoryMapper.insertCategory(id, "M1", 1);
-        categoryMapper.insertCategory(id, "M2", 1);
-        categoryMapper.insertCategory(id, "M3", 1);
+        int id = categoryMapper.insertCategory(1, "children_delete_test", 1, 1);
+        categoryMapper.insertCategory(id, "M1", 1, 1);
+        categoryMapper.insertCategory(id, "M2", 1, 1);
+        categoryMapper.insertCategory(id, "M3", 1, 1);
 
         categoryMapper.deleteCategoryByParentId(id, 1);
         assertThat(categoryMapper.getCategoriesByParentId(id, 1), empty());

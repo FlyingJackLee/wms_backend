@@ -5,25 +5,25 @@
 
 <mapper namespace="com.lizumin.wms.dao.OrderMapper">
     <select id="insertOrder">
-        INSERT INTO orders(me_id, selling_price, remark, selling_time, own_id)
-        VALUES (#{me_id}, #{selling_price}, #{remark}, #{selling_time}, #{own_id})
+        INSERT INTO orders(me_id, selling_price, remark, selling_time, own_id, group_id)
+        VALUES (#{me_id}, #{selling_price}, #{remark}, #{selling_time}, #{own_id}, #{group_id})
         RETURNING order_id;
     </select>
 
     <select id="getOrdersByDateRange" resultMap="order">
         SELECT order_id, selling_price, returned, remark, selling_time, M.me_id, cost, price, imei, create_time, sold, C.cate_id, parent_cate_id, name
         from orders AS O LEFT JOIN merchandise as M On O.me_id = M.me_id LEFT JOIN category AS C ON M.cate_id = C.cate_id
-        WHERE M.own_id = #{own_id} AND selling_time >= #{selling_time_start} AND selling_time &lt;= #{selling_time_end};
+        WHERE M.group_id = #{group_id} AND selling_time >= #{selling_time_start} AND selling_time &lt;= #{selling_time_end};
     </select>
 
     <select id="getOrderById" resultMap="order">
         SELECT order_id, selling_price, returned, remark, selling_time, M.me_id, cost, price, imei, create_time, sold, C.cate_id, parent_cate_id, name
         from orders AS O LEFT JOIN merchandise as M On O.me_id = M.me_id LEFT JOIN category AS C ON M.cate_id = C.cate_id
-        WHERE O.order_id = #{order_id} AND M.own_id = #{own_id};
+        WHERE O.order_id = #{order_id} AND M.group_id = #{group_id};
     </select>
 
     <update id="setOrderReturned">
-        UPDATE orders SET returned = #{returned} WHERE order_id = #{order_id} AND own_id = #{own_id};
+        UPDATE orders SET returned = #{returned} WHERE order_id = #{order_id} AND group_id = #{group_id};
     </update>
 
     <resultMap id="order" type="com.lizumin.wms.entity.Order">

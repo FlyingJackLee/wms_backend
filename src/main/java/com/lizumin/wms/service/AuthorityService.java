@@ -44,7 +44,7 @@ public class AuthorityService extends AbstractAuthenticationService {
     /**
      * 获取用户的权限, 只能是owner查询同一组下的
      */
-    @PreAuthorize("hasRole('ROLE_OWNER')")
+    @PreAuthorize("hasRole('OWNER')")
     @Transactional
     public List<SystemAuthority> getPermissionsByUserId(int userId) {
         Assert.isTrue(this.userService.getUserByID(userId).getGroup().getId() == getUser().getGroup().getId(),
@@ -60,7 +60,7 @@ public class AuthorityService extends AbstractAuthenticationService {
      * @param inventory 库存管理权限
      * @param statistics 订单查询权限
      */
-    @PreAuthorize("hasRole('ROLE_OWNER')")
+    @PreAuthorize("hasRole('OWNER')")
     @Transactional
     public void updatePermission(int userId, boolean shopping, boolean inventory, boolean statistics) {
         User user = this.userService.getUserByID(userId);

@@ -73,7 +73,9 @@ CREATE TABLE IF NOT EXISTS category(
            parent_cate_id integer not null check (parent_cate_id >= 0),
            name varchar(50) not null,
            own_id integer not null,
-           UNIQUE (own_id, parent_cate_id, name),
+           group_id integer not null,
+           UNIQUE (group_id, parent_cate_id, name),
+           constraint fk_category_groups foreign key(group_id) references groups(group_id),
            constraint fk_cate_user foreign key(own_id) references users(id)
 );
 
@@ -86,6 +88,8 @@ CREATE TABLE IF NOT EXISTS merchandise(
           create_time timestamp not null DEFAULT CURRENT_TIMESTAMP,
           sold boolean not null default false,
           own_id integer not null,
+          group_id integer not null,
+          constraint fk_merchandise_groups foreign key(group_id) references groups(group_id),
           constraint fk_me_cate foreign key(cate_id) references category(cate_id),
           constraint fk_me_user foreign key(own_id) references users(id)
 );
@@ -98,6 +102,8 @@ CREATE TABLE IF NOT EXISTS orders(
         remark VARCHAR(100) null,
         selling_time timestamp not null DEFAULT CURRENT_TIMESTAMP,
         own_id integer not null,
+        group_id integer not null,
+        constraint fk_orders_groups foreign key(group_id) references groups(group_id),
         constraint fk_order_user foreign key(own_id) references users(id),
         constraint fk_order_me foreign key(me_id) references merchandise(me_id)
 );
@@ -105,10 +111,10 @@ CREATE TABLE IF NOT EXISTS orders(
 CREATE UNIQUE INDEX idx_me_re on orders(me_id, returned) where (returned = false);
 
 CREATE TABLE IF NOT EXISTS notices(
-                                      id serial primary key not null UNIQUE ,
-                                      type varchar(10) not null DEFAULT 'warn',
-                                      publish_time timestamp not null DEFAULT CURRENT_TIMESTAMP,
-                                      content varchar(5000) not null DEFAULT '无'
+      id serial primary key not null UNIQUE ,
+      type varchar(10) not null DEFAULT 'warn',
+      publish_time timestamp not null DEFAULT CURRENT_TIMESTAMP,
+      content varchar(5000) not null DEFAULT '无'
 );
 
 INSERT INTO groups(group_id, store_name, address) VALUES (0, '默认', '默认地址');

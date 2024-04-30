@@ -29,8 +29,7 @@ public class OrderController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<ApiRes> createOrder(Authentication authentication,
-                                              @RequestParam("me_id") int meId,
+    public ResponseEntity<ApiRes> createOrder(@RequestParam("me_id") int meId,
                                               @RequestParam("selling_price") double sellingPrice,
                                               @RequestParam("selling_time") @Nullable long sellingTime,
                                               @RequestParam String remark) {
@@ -39,7 +38,7 @@ public class OrderController {
         }
 
         Date date = sellingTime == 0L ? new Date() : new Date(sellingTime);
-        int id = this.orderService.insertOrder(authentication, meId, sellingPrice, remark, date);
+        int id = this.orderService.insertOrder(meId, sellingPrice, remark, date);
         return ResponseEntity.ok(ApiRes.success(String.valueOf(id)));
     }
 
@@ -49,7 +48,7 @@ public class OrderController {
             return ResponseEntity.badRequest().body(ApiRes.fail());
         }
 
-        this.orderService.insertOrder(authentication, orders);
+        this.orderService.insertOrder(orders);
         return ResponseEntity.ok(ApiRes.success());
     }
 
@@ -61,7 +60,7 @@ public class OrderController {
 
         Date sellingTimeStart = new Date(start);
         Date sellingTimeEnd = new Date(end);
-        return ResponseEntity.ok(this.orderService.getOrdersByDateRange(authentication, sellingTimeStart, sellingTimeEnd));
+        return ResponseEntity.ok(this.orderService.getOrdersByDateRange(sellingTimeStart, sellingTimeEnd));
     }
 
     @PutMapping("/return/{id}")
@@ -70,7 +69,7 @@ public class OrderController {
             return ResponseEntity.badRequest().body(ApiRes.fail());
         }
 
-        this.orderService.returnOrder(authentication, orderId);
+        this.orderService.returnOrder(orderId);
         return ResponseEntity.ok(ApiRes.success());
     }
 }

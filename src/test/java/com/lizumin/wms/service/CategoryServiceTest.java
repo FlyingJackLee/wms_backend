@@ -9,8 +9,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
@@ -21,97 +27,202 @@ import static org.mockito.Mockito.*;
  * @author Zumin Li
  * @date 2024/2/13 23:42
  */
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@ActiveProfiles(value = "test")
 public class CategoryServiceTest {
-    @Mock
+    @MockBean
     private CategoryMapper categoryMapper;
 
-    private Authentication authentication;
-
-    @InjectMocks
+    @Autowired
     private CategoryService categoryService;
 
-    @BeforeEach
-    public void setUp() {
-        User user = new User.Builder().username("test").password("123456").id(1).build();
-        this.authentication = UsernamePasswordAuthenticationToken.authenticated(user, "test", List.of());
+    /**
+     * 根分类获取getRootCategories角色测试 - DEFAULT测试
+     */
+    @Test
+    @WithMockUserPrincipal
+    public void should_access_denied_when_get_root_with_bad_user_role() {
+        Assertions.assertThrows(AccessDeniedException.class, () -> {
+            categoryService.getRootCategories();
+        });
     }
 
     /**
-     * 根分类获取测试
+     * 根分类获取getRootCategories测试 - STAFF角色测试
      */
     @Test
+    @WithMockUserPrincipal(role = "ROLE_STAFF", groupId = 1)
     public void should_use_zero_when_find_root_categories() {
-        categoryService.getRootCategories(this.authentication);
+        categoryService.getRootCategories();
         verify(categoryMapper, times(1)).getCategoriesByParentId(0, 1);
     }
 
     /**
-     * getCategory测试
+     * 根分类获取getRootCategories测试 - OWNER测试
      */
     @Test
+    @WithMockUserPrincipal(role = "ROLE_OWNER", groupId = 1)
+    public void should_use_zero_when_find_root_categories_with_owner() {
+        categoryService.getRootCategories();
+        verify(categoryMapper, times(1)).getCategoriesByParentId(0, 1);
+    }
+
+    /**
+     * getCategory测试 - DEFAULT测试
+     */
+    @Test
+    @WithMockUserPrincipal
+    public void should_access_denied_when_get_category_with_bad_user_role() {
+        Assertions.assertThrows(AccessDeniedException.class, () -> {
+            categoryService.getCategory(2);
+        });
+    }
+
+    /**
+     * getCategory测试 STAFF角色测试
+     */
+    @Test
+    @WithMockUserPrincipal(role = "ROLE_STAFF", groupId = 2)
     public void should_relevant_result_when_get_category() {
         Assertions.assertThrows(IllegalArgumentException.class, () ->{
-            categoryService.getCategory(this.authentication, -1);
+            categoryService.getCategory(-1);
         });
 
-        categoryService.getCategory(this.authentication, 3);
-        verify(categoryMapper, times(1)).getCategoryById(3, 1);
+        categoryService.getCategory( 3);
+        verify(categoryMapper, times(1)).getCategoryById(3, 2);
     }
 
     /**
-     * getCategoriesByParentId异常测试
+     * getCategory测试 OWNER测试
      */
     @Test
-    public void should_throw_runtime_exception_when_parent_id_illegal() {
+    @WithMockUserPrincipal(role = "ROLE_STAFF", groupId = 2)
+    public void should_relevant_result_when_get_category_with_owner() {
         Assertions.assertThrows(IllegalArgumentException.class, () ->{
-            categoryService.getCategoriesByParentId(this.authentication, -1);
+            categoryService.getCategory(-1);
+        });
+
+        categoryService.getCategory( 3);
+        verify(categoryMapper, times(1)).getCategoryById(3, 2);
+    }
+
+    /**
+     * getCategoriesByParentId测试  - DEFAULT测试
+     */
+    @Test
+    @WithMockUserPrincipal
+    public void should_access_denied_when_get_category_by_parent_with_bad_user_role() {
+        Assertions.assertThrows(AccessDeniedException.class, () -> {
+            categoryService.getCategoriesByParentId(2);
         });
     }
 
     /**
-     * getCategoriesByParentId正常测试
+     * getCategoriesByParentId测试 -  STAFF角色测试
      */
     @Test
-    public void should_call_mapper_when_get_categories() {
-        categoryService.getCategoriesByParentId(this.authentication, 5);
-        verify(categoryMapper, times(1)).getCategoriesByParentId(5, 1);
-    }
-
-    /**
-     * 参数错误insertCategory测试
-     */
-    @Test
-    public void should_throw_exception_when_parent_or_name_illegal_when_insert() {
+    @WithMockUserPrincipal(role = "ROLE_STAFF", groupId = 2)
+    public void should_throw_runtime_exception_when_get_category_by_parent_with_staff() {
         Assertions.assertThrows(IllegalArgumentException.class, () ->{
-            categoryService.insertCategory(this.authentication, -1, "test");
+            categoryService.getCategoriesByParentId(-1);
         });
 
+        categoryService.getCategoriesByParentId(5);
+        verify(categoryMapper, times(1)).getCategoriesByParentId(5, 2);
+    }
+
+    /**
+     * getCategoriesByParentId测试 -  OWNER测试
+     */
+    @Test
+    @WithMockUserPrincipal(role = "ROLE_OWNER", groupId = 2)
+    public void should_throw_runtime_exception_when_get_category_by_parent_with_owner() {
         Assertions.assertThrows(IllegalArgumentException.class, () ->{
-            categoryService.insertCategory(this.authentication, 2, "");
+            categoryService.getCategoriesByParentId(-1);
+        });
+
+        categoryService.getCategoriesByParentId(5);
+        verify(categoryMapper, times(1)).getCategoriesByParentId(5, 2);
+    }
+
+    /**
+     * insertCategory测试  - DEFAULT测试
+     */
+    @Test
+    @WithMockUserPrincipal
+    public void should_access_denied_when_insert_category_by_parent_with_bad_user_role() {
+        Assertions.assertThrows(AccessDeniedException.class, () -> {
+            categoryService.insertCategory(-1, "test");
         });
     }
 
     /**
-     * insertCategory正常测试
+     * insertCategory测试  - STAFF
      */
     @Test
-    public void should_call_mapper_when_insert() {
-        categoryService.insertCategory(this.authentication,5, "test");
-        verify(categoryMapper, times(1)).insertCategory(5, "test", 1);
+    @WithMockUserPrincipal(role = "ROLE_STAFF", groupId = 2)
+    public void should_throw_exception_or_insert_when_insert_with_staff() {
+        Assertions.assertThrows(IllegalArgumentException.class, () ->{
+            categoryService.insertCategory(-1, "test");
+        });
+
+        Assertions.assertThrows(IllegalArgumentException.class, () ->{
+            categoryService.insertCategory(2, "");
+        });
+
+        categoryService.insertCategory(5, "test");
+        verify(categoryMapper, times(1)).insertCategory(5, "test", 1, 2);
     }
 
     /**
-     * deleteCategory正常测试
+     * insertCategory测试  - STAFF
      */
     @Test
-    public void should_call_mapper_when_delete() {
+    @WithMockUserPrincipal(role = "ROLE_STAFF", groupId = 2)
+    public void should_throw_exception_or_insert_when_insert_with_owner() {
+        categoryService.insertCategory(5, "test");
+        verify(categoryMapper, times(1)).insertCategory(5, "test", 1, 2);
+    }
+
+    /**
+     * deleteCategory测试  - DEFAULT测试
+     */
+    @Test
+    @WithMockUserPrincipal
+    public void should_access_denied_when_delete_category_by_parent_with_bad_user_role() {
+        Assertions.assertThrows(AccessDeniedException.class, () -> {
+            categoryService.deleteCategory(2);
+        });
+    }
+
+    /**
+     * deleteCategory测试  - STAFF
+     */
+    @Test
+    @WithMockUserPrincipal(role = "ROLE_STAFF", groupId = 2)
+    public void should_access_denied_when_delete_category_by_parent_with_staff() {
         Assertions.assertThrows(IllegalArgumentException.class, () ->{
-            categoryService.deleteCategory(this.authentication, 0);
+            categoryService.deleteCategory(0);
         });
 
-        categoryService.deleteCategory(this.authentication,5);
-        verify(categoryMapper, times(1)).deleteCategoryByParentId(5, 1);
-        verify(categoryMapper, times(1)).deleteCategory(5, 1);
+        categoryService.deleteCategory(5);
+        verify(categoryMapper, times(1)).deleteCategoryByParentId(5, 2);
+        verify(categoryMapper, times(1)).deleteCategory(5, 2);
+    }
+
+    /**
+     * deleteCategory测试  - STAFF
+     */
+    @Test
+    @WithMockUserPrincipal(role = "ROLE_OWNER", groupId = 2)
+    public void should_access_denied_when_delete_category_by_parent_with_owner() {
+        Assertions.assertThrows(IllegalArgumentException.class, () ->{
+            categoryService.deleteCategory(0);
+        });
+
+        categoryService.deleteCategory(5);
+        verify(categoryMapper, times(1)).deleteCategoryByParentId(5, 2);
+        verify(categoryMapper, times(1)).deleteCategory(5, 2);
     }
 }

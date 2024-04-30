@@ -13,6 +13,9 @@ public class Category {
     private int parentId; // 父分类id，用于多级分类，0表示一级分类
     private String name;
 
+    private int ownerId;
+    private int groupId;
+
     public int getId() {
         return id;
     }
@@ -35,6 +38,22 @@ public class Category {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getOwnerId() {
+        return ownerId;
+    }
+
+    public int getGroupId() {
+        return groupId;
+    }
+
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
     }
 
     @Override

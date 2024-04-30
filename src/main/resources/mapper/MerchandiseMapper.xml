@@ -5,58 +5,58 @@
 
 <mapper namespace="com.lizumin.wms.dao.MerchandiseMapper">
     <select id="getMerchandiseCount">
-        SELECT count(*) FROM merchandise WHERE own_id = #{owner_id} AND sold = #{sold};
+        SELECT count(*) FROM merchandise WHERE group_id = #{group_id} AND sold = #{sold};
     </select>
 
     <select id="getMerchandiseById" resultMap="merchandise">
         SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
         FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
-        WHERE M.me_id = #{me_id} AND M.own_id = #{owner_id};
+        WHERE M.me_id = #{me_id} AND M.group_id = #{group_id};
     </select>
 
     <select id="getAllMerchandise" resultMap="merchandise">
         SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
         FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
-        WHERE M.own_id = #{owner_id} AND M.sold = #{sold}
+        WHERE M.group_id = #{group_id} AND M.sold = #{sold}
         LIMIT #{limit} OFFSET #{offset};
     </select>
 
     <select id="getMerchandiseByImei" resultMap="merchandise">
         SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
         FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
-        WHERE M.imei = #{imei} AND M.own_id = #{owner_id} AND M.sold = #{sold};
+        WHERE M.imei = #{imei} AND M.group_id = #{group_id} AND M.sold = #{sold};
     </select>
 
     <select id="getMerchandiseByCateID" resultMap="merchandise">
         SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
         FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
-        WHERE M.cate_id = #{cate_id} AND M.own_id = #{owner_id} AND M.sold = #{sold};
+        WHERE M.cate_id = #{cate_id} AND M.group_id = #{group_id} AND M.sold = #{sold};
     </select>
 
     <select id="insertMerchandise">
-        INSERT INTO merchandise(cate_id, cost, price, imei, create_time, own_id)
-        values (#{cate_id}, #{cost}, #{price}, #{imei}, #{create_time}, #{owner_id})
+        INSERT INTO merchandise(cate_id, cost, price, imei, create_time, own_id, group_id)
+        values (#{cate_id}, #{cost}, #{price}, #{imei}, #{create_time}, #{owner_id}, #{group_id})
         RETURNING me_id;;
     </select>
 
     <update id="updateSold">
-        UPDATE merchandise SET sold = #{sold} WHERE me_id = #{me_id} AND own_id = #{owner_id};
+        UPDATE merchandise SET sold = #{sold} WHERE me_id = #{me_id} AND group_id = #{group_id};
     </update>
 
     <update id="updateMerchandise">
-        UPDATE merchandise set cost = #{cost}, price = #{price}, imei = #{imei} WHERE me_id = #{me_id} AND own_id = #{owner_id};
+        UPDATE merchandise set cost = #{cost}, price = #{price}, imei = #{imei} WHERE me_id = #{me_id} AND group_id = #{group_id};
     </update>
 
     <delete id="deleteMerchandise">
-        DELETE FROM orders WHERE me_id = #{me_id} AND own_id = #{owner_id};
-        DELETE FROM merchandise WHERE me_id = #{me_id} AND own_id = #{owner_id};
+        DELETE FROM orders WHERE me_id = #{me_id} AND group_id = #{group_id};
+        DELETE FROM merchandise WHERE me_id = #{me_id} AND group_id = #{group_id};
     </delete>
 
     <select id="searchMerchandise" resultMap="merchandise">
         <bind name="ltext" value="'%' + text + '%'" />
         SELECT M.me_id, M.price, M.cost, M.imei, M.create_time, M.sold, C.cate_id, C.parent_cate_id, C.name
         FROM merchandise AS M left join category AS C ON M.cate_id = C.cate_id
-        WHERE C.own_id = #{owner_id} AND M.sold = #{sold} AND (imei ILIKE #{ltext} OR C.name ILIKE #{ltext});
+        WHERE C.group_id = #{group_id} AND M.sold = #{sold} AND (imei ILIKE #{ltext} OR C.name ILIKE #{ltext});
     </select>
 
     <resultMap id="merchandise" type="com.lizumin.wms.entity.Merchandise">
