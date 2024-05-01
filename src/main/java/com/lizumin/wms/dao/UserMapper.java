@@ -32,6 +32,9 @@ public interface UserMapper {
     // password must be encrypted!
     void updatePasswordByEmail(@Param("email") String email, @Param("password") String password);
 
+    // password must be encrypted!
+    void updatePasswordByPhone(@Param("phone") String phone, @Param("password") String password);
+
     /**
      * 获取用户信息
      * @param userId

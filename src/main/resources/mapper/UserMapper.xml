@@ -65,6 +65,11 @@
         (SELECT user_id FROM users_detail WHERE email = #{email});
     </update>
 
+    <update id="updatePasswordByPhone">
+        UPDATE users SET password=#{password} WHERE id =
+        (SELECT user_id FROM users_detail WHERE phone_number = #{phone});
+    </update>
+
     <select id="getProfile">
         SELECT * FROM users_detail WHERE user_id = #{user_id};
     </select>

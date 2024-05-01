@@ -226,7 +226,7 @@ public class UserServiceTest {
     @Test
     public void should_set_encrypted_password_when_reset_by_email() {
         when(passwordEncoder.encode("test000")).thenReturn("encryted");
-        userService.resetPassword("test@test.com", "test000");
+        userService.resetPasswordByEmail("test@test.com", "test000");
         verify(passwordEncoder).encode("test000");
         verify(userMapper).updatePasswordByEmail("test@test.com", "encryted");
     }

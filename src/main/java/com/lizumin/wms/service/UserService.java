@@ -189,11 +189,29 @@ public class UserService implements UserDetailsService {
      * @param password not null or empty
      * @return
      */
-    public boolean resetPassword(@NonNull String email, @Nullable String password) {
+    public boolean resetPasswordByEmail(@NonNull String email, @Nullable String password) {
         // 加密密钥
         String encryptedPassword = passwordEncoder.encode(password);
         try {
             this.userMapper.updatePasswordByEmail(email, encryptedPassword);
+        } catch (Exception e){
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 根据手机号重置密码
+     *
+     * @param phone not null or empty
+     * @param password not null or empty
+     * @return
+     */
+    public boolean resetPasswordByPhone(@NonNull String phone, @Nullable String password) {
+        // 加密密钥
+        String encryptedPassword = passwordEncoder.encode(password);
+        try {
+            this.userMapper.updatePasswordByPhone(phone, encryptedPassword);
         } catch (Exception e){
             return false;
         }
