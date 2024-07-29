@@ -59,6 +59,10 @@
         WHERE C.group_id = #{group_id} AND M.sold = #{sold} AND (imei ILIKE #{ltext} OR C.name ILIKE #{ltext});
     </select>
 
+    <select id="countMerchandiseByCateId" resultMap="meCount">
+        SELECT count(*), SUM(cost) as sum_cost, sum(price) as sum_price FROM merchandise WHERE cate_id = #{cate_id} and sold = #{sold} and group_id = #{group_id};
+    </select>
+
     <resultMap id="merchandise" type="com.lizumin.wms.entity.Merchandise">
         <id property="id" column="me_id" />
         <result property="cost" column="cost" />
@@ -71,5 +75,11 @@
             <result property="parentId" column="parent_cate_id"/>
             <result property="name" column="name"/>
         </association>
+    </resultMap>
+
+    <resultMap id="meCount" type="com.lizumin.wms.entity.MeCount">
+        <result property="count" column="count" />
+        <result property="sumCost" column="sum_cost" />
+        <result property="sumPrice" column="sum_price" />
     </resultMap>
 </mapper>

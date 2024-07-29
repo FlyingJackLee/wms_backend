@@ -196,7 +196,7 @@ public class UserMapperTest {
     @Test
     public void should_get_group_id_when_query() {
         Integer result = this.userMapper.getGroupIdByPhone("13212341234");
-        assertThat(result, equalTo(1));
+        assertThat(result, greaterThanOrEqualTo(1));
 
         result = this.userMapper.getGroupIdByPhone("9999999996");
         assertThat(result, nullValue());

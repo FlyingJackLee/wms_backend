@@ -1,5 +1,6 @@
 package com.lizumin.wms.dao;
 
+import com.lizumin.wms.entity.MeCount;
 import com.lizumin.wms.entity.Merchandise;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -214,6 +215,22 @@ public class MerchandiseMapperTest {
         result.forEach(me -> {
             assertThat(me.isSold(), is(false));
         });
+    }
 
+    /**
+     * countMerchandiseByCateId测试
+     */
+    @Test
+    public void should_get_empty_or_count_when_account() {
+        // 已有数据测试
+        MeCount meCount = this.merchandiseMapper.countMerchandiseByCateId(11, false ,1);
+        assertThat(meCount, notNullValue());
+        assertThat(meCount.getCount(), greaterThanOrEqualTo(5));
+        assertThat(meCount.getSumCost(), greaterThanOrEqualTo(8750.00));
+        assertThat(meCount.getSumPrice(),greaterThanOrEqualTo(9995.00));
+
+        // 非法数据测试
+        meCount = this.merchandiseMapper.countMerchandiseByCateId(999, false , 999);
+        assertThat(meCount.getCount(), equalTo(0));
     }
 }

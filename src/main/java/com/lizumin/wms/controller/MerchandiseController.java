@@ -1,6 +1,7 @@
 package com.lizumin.wms.controller;
 
 import com.lizumin.wms.entity.ApiRes;
+import com.lizumin.wms.entity.MeCount;
 import com.lizumin.wms.entity.Merchandise;
 import com.lizumin.wms.entity.User;
 import com.lizumin.wms.service.MerchandiseService;
@@ -104,5 +105,10 @@ public class MerchandiseController {
             return ResponseEntity.badRequest().body(List.of());
         }
         return ResponseEntity.ok(this.merchandiseService.searchMerchandise(text, sold));
+    }
+
+    @GetMapping("/account")
+    public ResponseEntity<List<MeCount>> account() {
+        return ResponseEntity.ok(this.merchandiseService.accountMerchandises());
     }
 }

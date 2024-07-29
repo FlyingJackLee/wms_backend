@@ -1,6 +1,8 @@
 package com.lizumin.wms.service;
 
 import com.lizumin.wms.dao.MerchandiseMapper;
+import com.lizumin.wms.entity.Category;
+import com.lizumin.wms.entity.MeCount;
 import com.lizumin.wms.entity.Merchandise;
 import com.lizumin.wms.tool.Verify;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -21,14 +24,13 @@ import java.util.List;
  */
 @Service
 public class MerchandiseService extends AbstractAuthenticationService{
-    public static final int DEFAULT_PAGE_OFFSET = 0; // 查询起点
-
-    public static final int DEFAULT_PAGE_LIMIT = 50; // 每次查询数量
-
     private final MerchandiseMapper merchandiseMapper;
 
-    public MerchandiseService(MerchandiseMapper merchandiseMapper) {
+    private CategoryService categoryService;
+
+    public MerchandiseService(MerchandiseMapper merchandiseMapper, CategoryService categoryService) {
         this.merchandiseMapper = merchandiseMapper;
+        this.categoryService = categoryService;
     }
 
     /**
@@ -179,5 +181,29 @@ public class MerchandiseService extends AbstractAuthenticationService{
     public void updateSold(int meId, boolean sold) {
         Assert.isTrue( meId > 0, "invalid cate id");
         this.merchandiseMapper.updateSold(meId, sold, getGroupId());
+    }
+
+    /**
+     * 盘点库存(未写unit test)
+     */
+    @PreAuthorize("hasRole('STAFF')")
+    @Transactional
+    public List<MeCount> accountMerchandises() {
+        List<Category> roots = this.categoryService.getRootCategories();
+        List<MeCount> counts = new ArrayList<>(1);
+
+        for(Category root: roots) {
+            MeCount meCount = new MeCount();
+            meCount.setCategory(root);
+
+            // 遍历当前所有的子分类进行统计
+            List<Category> categories = this.categoryService.getCategoriesByParentId(root.getId());
+            for (Category category: categories) {
+                meCount.add(this.merchandiseMapper.countMerchandiseByCateId(category.getId(), false ,getGroupId()));
+            }
+
+            counts.add(meCount);
+        }
+        return counts;
     }
 }

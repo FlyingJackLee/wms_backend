@@ -1,5 +1,6 @@
 package com.lizumin.wms.dao;
 
+import com.lizumin.wms.entity.MeCount;
 import com.lizumin.wms.entity.Merchandise;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -118,4 +119,13 @@ public interface MerchandiseMapper {
      * @param groupId
      */
     void deleteMerchandise(@Param("me_id") int meId, @Param("group_id") int groupId);
+
+    /**
+     * 查询某个型号下统计数据
+     *
+     * @param cate_id
+     * @param groupId
+     * @return MeCount： 包含数量，总计花费，总计售价的结构体
+     */
+    MeCount countMerchandiseByCateId(@Param("cate_id") int cate_id, @Param("sold") boolean sold, @Param("group_id") int groupId);
 }
