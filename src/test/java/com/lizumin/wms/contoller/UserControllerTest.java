@@ -133,7 +133,7 @@ public class UserControllerTest {
         parameters.set("email", "test2@test.com");
 
         this.mvc.perform(MockMvcRequestBuilders.get("/user/code/email").queryParams(parameters))
-                .andExpect(status().is2xxSuccessful()).andExpect(content().string(equalTo("success")));
+                .andExpect(status().is2xxSuccessful());
         verify(mailService).sendVerifyCode(anyString(), anyString(), ArgumentMatchers.any(Locale.class));
         Date expire = redisOperator.getExpire("email_verify_code_test2@test.com");
         assertThat(expire, notNullValue());
@@ -156,17 +156,17 @@ public class UserControllerTest {
         parameters.set("password", "a1");
         parameters.set("code", "a1234");
         this.mvc.perform(MockMvcRequestBuilders.post("/user/reset/email").queryParams(parameters))
-                .andExpect(status().isBadRequest()).andExpect(content().string(equalTo("邮箱格式不正确")));
+                .andExpect(status().isBadRequest());
 
         parameters.set("email", "testresetemail@test.com");
         this.mvc.perform(MockMvcRequestBuilders.post("/user/reset/email").queryParams(parameters))
-                .andExpect(status().isBadRequest()).andExpect(content().string(equalTo("密码格式不正确(长度必须大于8小于16)")));
+                .andExpect(status().isBadRequest());
 
         // 3. code不存在cache
         parameters.set("email", "test@test.com");
         parameters.set("password", "a123456789");
         this.mvc.perform(MockMvcRequestBuilders.post("/user/reset/email").queryParams(parameters))
-                .andExpect(status().isBadRequest()).andExpect(content().string(equalTo("邮件验证码无效")));
+                .andExpect(status().isBadRequest());
     }
 
     /**

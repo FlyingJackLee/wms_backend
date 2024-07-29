@@ -32,35 +32,6 @@ public class SignUpController {
     }
 
     /**
-     * 根据username注册
-     *
-     * @param username
-     * @param password
-     * @return
-     */
-    @PostMapping("/username")
-    public ResponseEntity<ApiRes> signup(@RequestParam("username") String username,
-                                         @RequestParam("password") String password) {
-        if (!Verify.verifyUsername(username)) {
-            return ResponseEntity.badRequest().body(ApiRes.fail(MessageUtil.getMessageByContext("BPV-009")));
-        }
-        if (!Verify.verifyPassword(password)) {
-            return ResponseEntity.badRequest().body(ApiRes.fail(MessageUtil.getMessageByContext("BPV-010")));
-        }
-
-        // 新建账户流程
-        User userAdd = new User(username, this.passwordEncode.encode(password)); // 默认为0的group
-        userAdd.setAuthorities(SystemAuthority.defaults()); // 角色设置为默认 - 未加入group， 无权限
-
-        try {
-            this.userService.insertUser(userAdd);
-        } catch (DuplicateKeyException e){
-            return ResponseEntity.badRequest().body(ApiRes.fail(MessageUtil.getMessageByContext("BPV-011")));
-        }
-        return ResponseEntity.ok(ApiRes.success());
-    }
-
-    /**
      * 根据phone注册 (username自动生成)
      *
      * @param phone
