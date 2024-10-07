@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.lizumin</groupId>
 	<artifactId>wms</artifactId>
-	<version>beta.2.1</version>
+	<version>beta.2.21</version>
 	<name>wms</name>
 	<description>wms</description>
 	<properties>
@@ -98,7 +98,7 @@
 
 	</dependencies>
 	<build>
-		<finalName>wms_backend_beta_v210</finalName>
+		<finalName>wms_backend_beta_v221</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
