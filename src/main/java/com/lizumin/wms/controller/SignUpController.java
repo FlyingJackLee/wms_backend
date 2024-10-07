@@ -58,7 +58,7 @@ public class SignUpController {
 
         // 手机已被使用时停止
         if (userService.isPhoneExist(phone)) {
-            return ResponseEntity.badRequest().body(ApiRes.fail(MessageUtil.getMessageByContext("BPV-013")));
+            return ResponseEntity.badRequest().body(ApiRes.fail(MessageUtil.getMessageByContext("BPV-020")));
         }
 
         String username = generateUniqueUsername();

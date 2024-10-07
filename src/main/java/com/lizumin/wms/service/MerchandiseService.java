@@ -43,7 +43,7 @@ public class MerchandiseService extends AbstractAuthenticationService{
     @PreAuthorize("hasRole('STAFF')")
     public List<Merchandise> getMerchandiseByPage( boolean sold, int limit, int offset) {
         Assert.isTrue( limit >= 0 && offset >= 0, "invalid id or page options");
-        return merchandiseMapper.getAllMerchandise(getUserId(), sold, limit, offset);
+        return merchandiseMapper.getAllMerchandise(getGroupId(), sold, limit, offset);
     }
 
     public List<Merchandise> getMerchandiseByPage(int limit, int offset) {
