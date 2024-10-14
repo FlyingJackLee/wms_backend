@@ -198,9 +198,9 @@ public class UserController {
             return ResponseEntity.badRequest().body(MessageUtil.getMessageByContext("BPV-010"));
         }
 
-        // 邮箱不存在时停止
+        // 手机号不存在时停止
         if (!userService.isPhoneExist(phone)) {
-            return ResponseEntity.badRequest().body(MessageUtil.getMessageByContext("BPV-020"));
+            return ResponseEntity.badRequest().body(MessageUtil.getMessageByContext("BPV-021"));
         }
 
         // 验证码不存在时不允许验证
