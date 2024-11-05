@@ -1,0 +1,91 @@
+# 提前创建以下
+# docker volume create wms_beta_db_data
+# docker volume create wms_beta_spring_logs
+# docker network create wms-beta
+
+services:
+  wms_backend:
+    build: ../../
+    container_name: wms_backend
+    networks:
+      - wms-beta
+    depends_on:
+      - wms_pg
+      - wms_redis
+    ports:
+      - 8080:8080
+    env_file:
+     - beta.env
+     - db.env
+    environment:
+      - WMS_PORT=8080
+      - WMS_PROFILE_ACTIVATE=prod
+      - WMS_DATASOURCE_URL=jdbc:postgresql://wms_pg:5432/wms
+      - WMS_DATASOURCE_USERNAME=wms
+      - WMS_DATASOURCE_PASSWORD=B9aM5VRad8p2uPPF3AVb
+      - WMS_REDIS_HOST=wms_redis
+      - WMS_REDIS_PORT=6379
+      - JWT_PRIVATE_KEY_PATH=/run/secrets/private.pem
+      - JWT_PUBLIC_KEY_PATH=/run/secrets/public.pem
+    volumes:
+      - wms_beta_spring_logs:/app/logs
+    secrets:
+      - private.pem
+      - public.pem
+
+  wms_pg:
+    build:
+      context: ./
+      dockerfile: pg.Dockerfile
+    container_name: wms_pg
+    networks:
+      - wms-beta
+    ports:
+      - 5432:5432
+    expose:
+      - 5432
+    restart: always
+    shm_size: 512mb
+    env_file:
+      - db.env
+    environment:
+      - POSTGRES_USER=wms
+    volumes:
+      - wms_beta_db_data:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    container_name: db-adminer
+    restart: always
+    ports:
+      - 5433:8080
+    networks:
+      - wms-beta
+
+  wms_redis:
+    image: redis:latest
+    networks:
+      - wms-beta
+    container_name: wms_redis
+    restart: always
+    ports:
+      - 6379:6379
+
+networks:
+  wms-beta:
+    external: true
+    name: wms-beta
+
+volumes:
+  wms_beta_db_data:
+    external: true
+    name: wms_beta_db_data
+  wms_beta_spring_logs:
+    external: true
+    name: wms_beta_spring_logs
+
+secrets:
+  private.pem:
+    file: private.pem
+  public.pem:
+    file: public.pem

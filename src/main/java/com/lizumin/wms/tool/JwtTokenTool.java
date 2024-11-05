@@ -3,34 +3,58 @@ package com.lizumin.wms.tool;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 
-import java.io.*;
-import java.security.*;
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
+/**
+ * 用户生成和验证jwt token的工具， 务必设置好key路径的环境变量
+ *
+ */
 public class JwtTokenTool {
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenTool.class);
-    private static final String PRIVATE_KEY_PATH = "private.key";
-    private static final String PUBLIC_KEY_PATH = "public.key";
     private static final int DEFAULT_TOKEN_EXPIRE_HOURS = 24;
+
+    private static final String PRIVATE_ENV = "JWT_PRIVATE_KEY_PATH";
+    private static final String PUBLIC_ENV = "JWT_PUBLIC_KEY_PATH";
 
     private static PrivateKey privateKey;
     private static PublicKey publicKey;
 
-     // Read private and public key from file.
     static {
-        try {
-            InputStream inputStream = new ClassPathResource(PRIVATE_KEY_PATH).getInputStream();
-            byte[] keyBytes = inputStream.readAllBytes();
+         // Read private and public key path from system env.
+         Map<String, String> env = System.getenv();
+         if (!env.containsKey(PRIVATE_ENV) || !env.containsKey(PUBLIC_ENV)){
+             String msg = "Missing PRIVATE_ENV/PUBLIC_ENV system setting - set system env JWT_PRIVATE_KEY_PATH and JWT_PUBLIC_KEY_PATH";
+             logger.error(msg);
+             logger.info("Current envs: {}", env);
+             throw new RuntimeException(msg);
+         }
+         String privateKeyPath = env.get(PRIVATE_ENV);
+         String publicKeyPath = env.get(PUBLIC_ENV);
 
-            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+         File privateFile = new File(privateKeyPath);
+         try(FileInputStream  inputStream = new FileInputStream(privateFile)) {
+             // Convert key string to standard private string
+             String key = new String(inputStream.readAllBytes(), Charset.defaultCharset());
+             String privateKeyPEM = key
+                     .replace("-----BEGIN PRIVATE KEY-----", "")
+                     .replaceAll("\n", "")
+                     .replaceAll("\r", "")
+                     .replace("-----END PRIVATE KEY-----", "");
+            byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
+
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(encoded);
             KeyFactory kf = KeyFactory.getInstance("RSA");
             privateKey = kf.generatePrivate(spec);
         } catch (IOException e) {
@@ -40,11 +64,18 @@ public class JwtTokenTool {
             throw new RuntimeException(e);
         }
 
-        try {
-            InputStream inputStream = new ClassPathResource(PUBLIC_KEY_PATH).getInputStream();
-            byte[] keyBytes = inputStream.readAllBytes();
+        File publicFile = new File(publicKeyPath);
+        try(FileInputStream inputStream = new FileInputStream(publicFile)){
+            // Convert key string to standard public string
+            String key = new String(inputStream.readAllBytes(), Charset.defaultCharset());
+            String publicKeyPEM = key
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replaceAll("\n", "")
+                    .replaceAll("\r", "")
+                    .replace("-----END PUBLIC KEY-----", "");
+            byte[] encoded = Base64.getDecoder().decode(publicKeyPEM);
 
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(encoded);
             KeyFactory kf = KeyFactory.getInstance("RSA");
             publicKey = kf.generatePublic(spec);
         } catch (IOException e) {
@@ -54,6 +85,7 @@ public class JwtTokenTool {
             throw new RuntimeException(e);
         }
     }
+
 
     /**
      * 生成JWT
