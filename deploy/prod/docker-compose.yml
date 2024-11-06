@@ -1,0 +1,54 @@
+# 提前创建以下
+# docker volume create wms_spring_logs
+# docker network create wms
+
+services:
+  wms_backend:
+    build: ../../
+    image: wms_backend:${WMS_APP_VERSION}
+    container_name: wms
+    ports:
+      - 8080:8080
+    expose:
+      - 8080
+    env_file:
+     - app.env
+    environment:
+      - WMS_PORT=8080
+      - WMS_PROFILE_ACTIVATE=prod
+      - JWT_PRIVATE_KEY_PATH=/run/secrets/private.pem
+      - JWT_PUBLIC_KEY_PATH=/run/secrets/public.pem
+      - WMS_REDIS_HOST=wms_redis
+      - WMS_REDIS_PORT=6379
+    volumes:
+      - wms_spring_logs:/app/logs
+    secrets:
+      - private.pem
+      - public.pem
+    networks:
+      - wms
+
+  wms_redis:
+    image: redis:latest
+    networks:
+      - wms
+    container_name: wms_redis
+    restart: always
+    ports:
+      - 6379:6379
+
+networks:
+  wms:
+    external: true
+    name: wms
+
+volumes:
+  wms_spring_logs:
+    external: true
+    name: wms_spring_logs
+
+secrets:
+  private.pem:
+    file: private.pem
+  public.pem:
+    file: public.pem

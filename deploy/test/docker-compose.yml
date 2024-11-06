@@ -1,0 +1,24 @@
+services:
+  wms_pg_test:
+    build:
+      context: ./
+      dockerfile: pg.Dockerfile
+    container_name: wms_pg_test
+    ports:
+      - 5433:5432
+    expose:
+      - 5433
+    restart: always
+    shm_size: 512mb
+    environment:
+      - POSTGRES_USER=wms_test
+      - POSTGRES_PASSWORD=dI1sP7aU5
+
+  wms_redis_test:
+    image: redis:latest
+    container_name: wms_redis_test
+    restart: always
+    ports:
+      - 6373:6379
+    expose:
+      - 6373

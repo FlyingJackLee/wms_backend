@@ -93,6 +93,5 @@ $RECYCLE.BIN/
 
 *.jks
 *.pem
+*.env
 /src/main/resources/ssl/
-/deploy/beta/beta.env
-/deploy/beta/db.env
