@@ -1,16 +1,17 @@
 pipeline {
-    agent {
-        label 'master'
+    // 请确保agent上配置了
+    // 1. docker
+    // 2. docker-compose
+    // 3. jdk21
+    // 4. maven
+    agent{
+        label 'tencent-beta'
     }
 
     options {
         timeout(time: 10, unit: 'MINUTES')
     }
 
-    tools {
-        maven 'M3'
-        jdk 'jdk21'
-    }
 
     environment {
         TZ = 'Asia/Shanghai'
@@ -42,7 +43,7 @@ pipeline {
                     sh "openssl genrsa -out private.pem"
                     sh "openssl rsa -in private.pem -inform pem -pubout -out public.pem"
 
-                    // 构建测试用环境
+                    // 构建测试用环境y
                     sh "docker-compose up -d --build"
                 }
 
@@ -68,12 +69,8 @@ pipeline {
               请确保允许环境上包含docker和docker-compose
         */
         stage('Deploy on beta'){
-            agent{
-                label 'tencent-beta'
-            }
             when{
-                beforeAgent true
-                branch 'dev'
+                branch 'dev*'
             }
             steps {
                 dir('deploy/beta') {
