@@ -93,6 +93,6 @@ mybatis.configuration.jdbc-type-for-null=NULL
 
 ```
 ### jwt用密钥对
-生成工程必要的密钥队，推荐使用openssl工具生成，参考如下
+生成工程必要的密钥对，推荐使用openssl工具生成，参考如下
 1. 私钥: `openssl genrsa -out private.pem`
-2. 公钥 `openssl rsa -in privkey.pem -inform pem -pubout -out public.pem`
+2. 公钥 `openssl rsa -in private.pem -inform pem -pubout -out public.pem`
