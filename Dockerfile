@@ -2,7 +2,7 @@ FROM openjdk:21-slim
 LABEL authors="Zumin Li"
 
 WORKDIR /app
-ADD target/wms_backend_beta.jar app.jar
+ADD target/*.jar app.jar
 
 EXPOSE 8080
 

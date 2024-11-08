@@ -23,7 +23,6 @@ services:
       - WMS_PROFILE_ACTIVATE=prod
       - WMS_DATASOURCE_URL=jdbc:postgresql://wms_pg:5432/wms
       - WMS_DATASOURCE_USERNAME=wms
-      - WMS_DATASOURCE_PASSWORD=B9aM5VRad8p2uPPF3AVb
       - WMS_REDIS_HOST=wms_redis
       - WMS_REDIS_PORT=6379
       - JWT_PRIVATE_KEY_PATH=/run/secrets/private.pem
@@ -55,7 +54,7 @@ services:
       - wms_beta_db_data:/var/lib/postgresql/data
 
   adminer:
-    image: adminer
+    image: adminer:4.8.1
     container_name: db_adminer_beta
     restart: always
     ports:
@@ -64,7 +63,7 @@ services:
       - wms-beta
 
   wms_redis:
-    image: redis:latest
+    image: redis:8.0-M02
     networks:
       - wms-beta
     container_name: wms_redis_beta

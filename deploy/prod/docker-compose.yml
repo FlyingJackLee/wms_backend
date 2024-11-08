@@ -29,7 +29,7 @@ services:
       - wms
 
   wms_redis:
-    image: redis:latest
+    image: redis:8.0-M02
     networks:
       - wms
     container_name: wms_redis
