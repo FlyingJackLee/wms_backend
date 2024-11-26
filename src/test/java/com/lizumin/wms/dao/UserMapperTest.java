@@ -1,6 +1,5 @@
 package com.lizumin.wms.dao;
 
-import com.lizumin.wms.entity.SimpleAuthority;
 import com.lizumin.wms.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,8 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -34,6 +31,30 @@ public class UserMapperTest {
         assertThat(result, nullValue());
 
         result = this.userMapper.getUserByUsername(null);
+        assertThat(result, nullValue());
+    }
+
+    /**
+     * 查找User测试
+     *
+     */
+    @Test
+    public void should_get_user_when_username_exist_in_db() {
+        User result = this.userMapper.getUserByUsername("test001");
+        assertThat(result.getUsername(), equalTo("test001"));
+        assertThat(result.getGroup().getId(), is(0)); // 默认为0 缺省组
+    }
+
+    /**
+     * getUserById测试
+     *
+     */
+    @Test
+    public void should_get_user_with_id() {
+        User result = this.userMapper.getUserById(1);
+        assertThat(result.getUsername(), equalTo("test001"));
+
+        result = this.userMapper.getUserById(99);
         assertThat(result, nullValue());
     }
 
@@ -74,16 +95,6 @@ public class UserMapperTest {
 
         result = this.userMapper.getUsernameByPhoneNumber("1234");
         assertThat(result, nullValue());
-    }
-
-    /**
-     * 查找User测试
-     *
-     */
-    @Test
-    public void should_get_user_when_username_exist_in_db() {
-        User result = this.userMapper.getUserByUsername("test001");
-        assertThat(result.getUsername(), equalTo("test001"));
     }
 
     /**
@@ -162,33 +173,6 @@ public class UserMapperTest {
     }
 
     /**
-     * 测试user不存在或者输入不合法时插入authority
-     *
-     */
-    @Test
-    public void should_not_insert_authority_when_user_id_not_exist_or_authority_empty() {
-        // user id not exist: throw DataIntegrityViolationException
-        Assertions.assertThrows(DataIntegrityViolationException.class, () -> this.userMapper.insertAuthority(-1, "test_authority"));
-
-        // authority empty: throw DataIntegrityViolationException
-        Assertions.assertThrows(DataIntegrityViolationException.class, () -> this.userMapper.insertAuthority(1, ""));
-        Assertions.assertThrows(DataIntegrityViolationException.class, () -> this.userMapper.insertAuthority(1, null));
-    }
-
-    /**
-     * 正常插入authority
-     *
-     */
-    @Test
-    public void should_insert_authority_when_user_id_exist() {
-        this.userMapper.insertAuthority(1, "test_authority");
-        User user = this.userMapper.getUserByUsername("test001");
-        AtomicBoolean exist = new AtomicBoolean(false);
-        user.getAuthorities().forEach(authority -> exist.set(authority.equals(new SimpleAuthority("test_authority"))));
-        assertThat(exist.get(), is(true));
-    }
-
-    /**
      * 正常插入email/phone
      *
      */
@@ -206,6 +190,17 @@ public class UserMapperTest {
         assertThat(this.userMapper.getUsernameByEmail("testdetail@test.com"), notNullValue());
     }
 
+    /**
+     * getGroupIdByPhone测试
+     */
+    @Test
+    public void should_get_group_id_when_query() {
+        Integer result = this.userMapper.getGroupIdByPhone("13212341234");
+        assertThat(result, greaterThanOrEqualTo(1));
+
+        result = this.userMapper.getGroupIdByPhone("9999999996");
+        assertThat(result, nullValue());
+    }
 
     /**
      * 正常插入email/phone
@@ -237,5 +232,31 @@ public class UserMapperTest {
 
         User modifedUser = this.userMapper.getUserByUsername(user.getUsername());
         assertThat(modifedUser.getPassword(), equalTo("resettest123"));
+    }
+
+    /**
+     * getProfile测试
+     */
+    public void should_get_null_or_detail() {
+        User user = new User.Builder().username("getprofiletest").password("test1234").build();
+        this.userMapper.insertUser(user);
+        assertThat(this.userMapper.getProfile(user.getId()), nullValue());
+
+        this.userMapper.updateEmail(user.getId(), "getprofiletest@test.com");
+        assertThat(this.userMapper.getProfile(user.getId()).getEmail(), equalTo("getprofiletest@test.com"));
+    }
+
+    /**
+     * updateNickname测试
+     *
+     */
+    @Test
+    public void should_throw_exception_or_update_nickname() {
+        User user = new User.Builder().username("nicknametest").password("test1234").build();
+        this.userMapper.insertUser(user);
+
+        this.userMapper.updateNickname(user.getId(), "nicktest");
+
+        assertThat(this.userMapper.getProfile(user.getId()).getNickname(), equalTo("nicktest"));
     }
 }

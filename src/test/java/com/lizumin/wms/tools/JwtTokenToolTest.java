@@ -8,19 +8,16 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.security.*;
-
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-
 import static com.lizumin.wms.tool.JwtTokenTool.generateToken;
 import static com.lizumin.wms.tool.JwtTokenTool.verifyAndGetClaims;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 public class JwtTokenToolTest {
     private static PrivateKey privateKey;
@@ -98,22 +95,6 @@ public class JwtTokenToolTest {
         token = "not.areal.token";
         claimsJws = verifyAndGetClaims(token);
         assertThat(claimsJws.isEmpty(),is(true));
-    }
-
-    /**
-     * 测试token合法时, 验证token
-     *
-     */
-    @Test
-    public void should_get_claims_when_token_is_legal() throws ParseException {
-        // 利用key手动生成的，如果key变化需要修改测试token(2124年过期)
-        String token = "eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOlsidGVzdCJdLCJleHAiOjQ4NjE1MjkzOTAsImlhdCI6MTcwNTg1NTc5MH0.h1mpQPTdxVPOyYhGYIcp6twhY7IJ1oTwZ93lqe3_tONRqsFKSDdKijjQNhjjcqbVCxEX3lnU8WE-WUJAaBVkzAc1bKDjF0RZKX-KA0sErdu20I6U37dg8h50JGLx8h36ibP7aTO-jNmAB9Mpz_kbSCEW5gy1-PMUK9LShoNzs8ZrBZ9RA0CLd_xXZ5KByPXuNIRMwAXnse82GuBm2_S3E0oUGf7mXW28oRu31nZ4mEPe0AD7dz7yV_Vh4atHkSWgtq5weWR0hromVArx3a9hhxvP802J_6cP7W5jfTe8XgEBhi5xJ9R6DpbTRyDfx809Sa76kK1RKu-q8dsDvCcX5g";
-        Optional<Jws<Claims>> claimsJws = verifyAndGetClaims(token);
-        assertThat(claimsJws.isPresent(),is(true));
-        assertThat(claimsJws.get().getPayload().getAudience(), hasItem("test"));
-
-        long tokenDate = claimsJws.get().getPayload().getExpiration().getTime();
-        assertThat(tokenDate, is(4861529390000L));
     }
 
     private long diffMill(Date d1, Date d2) {

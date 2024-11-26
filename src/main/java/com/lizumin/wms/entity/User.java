@@ -1,11 +1,6 @@
 package com.lizumin.wms.entity;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.CredentialsContainer;
@@ -13,9 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityCoreVersion;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
@@ -37,7 +30,9 @@ public class User implements UserDetails, CredentialsContainer {
     private boolean credentialsNonExpired = true;
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
-    private Set<GrantedAuthority> authorities;
+    private Set<GrantedAuthority> authorities = new HashSet<>(0);
+
+    private Group group = new Group();
 
     public User() {
     }
@@ -56,6 +51,7 @@ public class User implements UserDetails, CredentialsContainer {
         setAccountNonLocked(builder.accountNonLocked);
         setCredentialsNonExpired(builder.credentialsNonExpired);
         setAuthorities(builder.authorities);
+        setGroup(builder.group);
     }
 
     public void setPassword(String password) {
@@ -195,15 +191,28 @@ public class User implements UserDetails, CredentialsContainer {
         }
     }
 
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
     public static final class Builder {
         private int id;
         private String password;
+
         private String username;
         private boolean enabled = true;
+
         private boolean accountNonExpired = true;
+
         private boolean accountNonLocked = true;
+
         private boolean credentialsNonExpired = true;
-        private Set<GrantedAuthority> authorities = new HashSet<>(1);
+        private Set<GrantedAuthority> authorities = new HashSet<>(0);
+        private Group group = new Group();
 
         public Builder() {
         }
@@ -245,6 +254,11 @@ public class User implements UserDetails, CredentialsContainer {
 
         public Builder authorities(Set<GrantedAuthority> val) {
             authorities = val;
+            return this;
+        }
+
+        public Builder group(Group val) {
+            group = val;
             return this;
         }
 

@@ -1,0 +1,107 @@
+pipeline {
+    // 注意本流水线依赖于build流水线，请确保wms-backend-build流水线存在
+    // 请确保agent上配置了
+    // 1. docker
+    // 2. docker compose
+    // 3. jdk21
+    // 4. maven
+    // 5. git
+    agent{
+        label 'beta'
+    }
+
+    parameters {
+        string(name:'BRANCH', defaultValue: 'dev', description: 'which branch to build?')
+    }
+
+    options {
+        timeout(time: 15, unit: 'MINUTES')
+    }
+
+    tools{
+        maven 'M3'
+        jdk 'jdk21'
+    }
+
+    environment {
+        TZ = 'Asia/Shanghai'
+    }
+
+    stages {
+        stage('Preparation'){
+            steps {
+                git branch: "${params.BRANCH}", credentialsId: 'gitee', url: 'git@gitee.com:zuminli/wms_backend.git'
+                /*
+                    下载配置文件
+                 */
+                dir('temp'){
+                    checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'codeup-read', url: 'git@codeup.aliyun.com:63a434c1aa32314b151eef46/wms/wms_configs.git']])
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh "mkdir -p target"
+                build job: 'wms-backend-build', parameters: [string(name: 'BRANCH', value: "${params.BRANCH}")]
+            }
+        }
+
+        /*
+          Beta部署阶段：
+              请确保允许环境上包含docker和docker compose
+        */
+        stage('Deploy on beta'){
+            steps {
+                copyArtifacts(projectName: 'wms-backend-build');
+
+                // 复制必要配置文件
+                sh "mkdir -p deploy/beta"
+                sh "cp -f temp/beta/* deploy/beta/"
+
+                script{
+                    def archiveExists = sh(script: 'ls target/*.jar > /dev/null 2>&1 && echo 0 || echo 1', returnStatus: true)
+                    if(archiveExists == 1){
+                        error "制品不存在，流水线终止。"
+                    }
+
+                    if(!fileExists('deploy/beta/db.env')){
+                        error "db.env不存在，流水线终止。"
+                    }
+
+                    if(!fileExists('deploy/beta/db.env')){
+                        error "db.env不存在，流水线终止。"
+                    }
+                }
+
+                dir('deploy/beta') {
+                    echo '构建beta环境用秘钥对'
+                    sh "openssl genrsa -out private.pem"
+                    sh "openssl rsa -in private.pem -inform pem -pubout -out public.pem"
+
+                    echo '开始部署'
+
+                    script{
+                        try {
+                            sh "docker network create wms-beta"
+                        } catch (ignored) {
+                            echo "network wms-beta already exist, skip"
+                        }
+                    }
+
+                    sh "docker volume create wms_beta_db_data"
+                    sh "docker volume create wms_beta_spring_logs"
+
+                    sh "docker compose down"
+                    sh "docker compose up -d --build"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs cleanWhenFailure: false, cleanWhenNotBuilt: false, cleanWhenUnstable: false
+        }
+    }
+}

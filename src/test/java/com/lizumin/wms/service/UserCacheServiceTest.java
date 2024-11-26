@@ -1,7 +1,7 @@
 package com.lizumin.wms.service;
 
 import com.lizumin.wms.MockRedisOperator;
-import com.lizumin.wms.entity.SimpleAuthority;
+import com.lizumin.wms.entity.SystemAuthority;
 import com.lizumin.wms.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -47,10 +47,8 @@ public class UserCacheServiceTest {
      */
     @Test
     public void should_insert_and_return_user_when_user_in_cache() {
-        Set<GrantedAuthority> authorities = new HashSet<>(1);
-        authorities.add(SimpleAuthority.userAuthority());
         UserDetails user = new User.Builder().username("test_cache").password("test_cache")
-                .authorities(authorities).build();
+                .authorities(SystemAuthority.defaults()).build();
         this.userCacheService.putUserInCache(user);
 
         UserDetails result = this.userCacheService.getUserFromCache("test_cache");
@@ -75,11 +73,8 @@ public class UserCacheServiceTest {
     @Test
     public void should_remove_user_when_user_in_cache() {
         userCacheService.removeUserFromCache("not_exist"); //不应该报错
-
-        Set<GrantedAuthority> authorities = new HashSet<>(1);
-        authorities.add(SimpleAuthority.userAuthority());
         UserDetails user = new User.Builder().username("test_cache").password("test_cache")
-                .authorities(authorities).build();
+                .authorities(SystemAuthority.defaults()).build();
         this.userCacheService.putUserInCache(user);
 
         assertThat(this.userCacheService.getUserFromCache("test_cache"), notNullValue());

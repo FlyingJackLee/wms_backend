@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lizumin.wms.dao.GroupMapper">
+   <resultMap id="GroupResultMap" type="com.lizumin.wms.entity.Group">
+      <result property="id" column="group_id"/>
+      <result property="storeName" column="store_name"/>
+      <result property="address" column="address"/>
+      <result property="contact" column="contact"/>
+   </resultMap>
+
+   <select id="getGroupById">
+      SELECT * FROM groups WHERE group_id = #{group_id};
+   </select>
+
+   <select id="getGroupByUserId" resultMap="GroupResultMap">
+      SELECT * FROM groups WHERE group_id = (SELECT users.group_id FROM users WHERE id = #{user_id});
+   </select>
+
+   <update id="updateGroupOfUser">
+      UPDATE users SET group_id = #{group_id} WHERE id = #{user_id};
+   </update>
+
+   <select id="insertGroup">
+      INSERT INTO groups(store_name, address, contact, create_time) VALUES (#{store_name}, #{address}, #{contact}, #{create_time})
+      RETURNING group_id;
+   </select>
+
+   <update id="updateStoreName">
+      UPDATE groups SET store_name =#{store_name} where group_id = #{group_id};
+   </update>
+
+   <update id="updateAddress">
+      UPDATE groups SET address =#{address} where group_id = #{group_id};
+   </update>
+
+   <update id="updateContact">
+      UPDATE groups SET contact =#{contact} where group_id = #{group_id};
+   </update>
+
+   <select id="getUsersByGroupId">
+      SELECT id as userId, nickname, phone_number, email FROM users t1 left join users_detail t2 ON t1.id = t2.user_id
+      WHERE t1.group_id = #{group_id};
+   </select>
+
+   <!--   下面为group_request表操作-->
+   <insert id="insertRequest">
+      INSERT INTO group_request(user_id, group_id) VALUES (#{user_id}, #{group_id});
+   </insert>
+
+   <delete id="deleteRequest">
+      DELETE FROM group_request WHERE user_id = #{user_id};
+   </delete>
+
+   <select id="getGroupByUserIdInRequest" resultMap="GroupResultMap">
+      SELECT t2.group_id, t2.store_name, t2.address, t2.contact
+      FROM group_request t1 left join groups t2 on t1.group_id = t2.group_id
+      WHERE t1.user_id = #{user_id};
+   </select>
+
+   <select id="getRequestUsersByGroupId">
+      SELECT t1.user_id, nickname, phone_number, email FROM group_request as t1 left join users_detail as t2 ON t1.user_id = t2.user_id
+      WHERE t1.group_id = #{group_id};
+   </select>
+</mapper>

@@ -1,5 +1,6 @@
 package com.lizumin.wms.service;
 
+import com.lizumin.wms.dao.AuthorityMapper;
 import com.lizumin.wms.entity.User;
 import com.lizumin.wms.exception.AuthenticationUserException;
 import com.lizumin.wms.dao.UserMapper;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -20,10 +22,13 @@ public class UserService implements UserDetailsService {
 
     private PasswordEncoder passwordEncoder;
 
-    public UserService(UserMapper userMapper, UserCache userCache, PasswordEncoder passwordEncoder) {
+    private AuthorityMapper authorityMapper;
+
+    public UserService(UserMapper userMapper, UserCache userCache, PasswordEncoder passwordEncoder, AuthorityMapper authorityMapper) {
         this.userMapper = userMapper;
         this.userCache = userCache;
         this.passwordEncoder = passwordEncoder;
+        this.authorityMapper = authorityMapper;
     }
 
     /**
@@ -62,6 +67,17 @@ public class UserService implements UserDetailsService {
     }
 
     /**
+     * 根据id获取User
+     *
+     * @param id
+     * @return
+     */
+    public User getUserByID(int id) {
+        Assert.isTrue(id > 0, "invalid user id");
+        return this.userMapper.getUserById(id);
+    }
+
+    /**
      * Get username by email
      *
      * @param email: not null or empty
@@ -79,6 +95,24 @@ public class UserService implements UserDetailsService {
      */
     public String getUsernameByPhoneNumber(String phoneNumber) {
         return this.userMapper.getUsernameByPhoneNumber(phoneNumber);
+    }
+
+    /**
+     * get group id by phone
+     *
+     * @param phone
+     * @return
+     */
+    public int getGroupIdByPhone(String phone){
+        Assert.isTrue(Verify.verifyPhoneNumber(phone), "not a valid phone");
+        Integer groupId = this.userMapper.getGroupIdByPhone(phone);
+
+        // 为null表示未找到返回-1
+        if (groupId == null) {
+            return -1;
+        } else {
+            return (int) groupId;
+        }
     }
 
     /**
@@ -122,7 +156,7 @@ public class UserService implements UserDetailsService {
         this.userMapper.insertUser(user);
         if (user.getId() >= 2) {
             user.getAuthorities().forEach(authority -> {
-                this.userMapper.insertAuthority(user.getId(), authority.getAuthority());
+                this.authorityMapper.insertAuthority(user.getId(), authority.getAuthority());
             });
         }
         return user.getId();
@@ -155,11 +189,29 @@ public class UserService implements UserDetailsService {
      * @param password not null or empty
      * @return
      */
-    public boolean resetPassword(@NonNull String email, @Nullable String password) {
+    public boolean resetPasswordByEmail(@NonNull String email, @Nullable String password) {
         // 加密密钥
         String encryptedPassword = passwordEncoder.encode(password);
         try {
             this.userMapper.updatePasswordByEmail(email, encryptedPassword);
+        } catch (Exception e){
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 根据手机号重置密码
+     *
+     * @param phone not null or empty
+     * @param password not null or empty
+     * @return
+     */
+    public boolean resetPasswordByPhone(@NonNull String phone, @Nullable String password) {
+        // 加密密钥
+        String encryptedPassword = passwordEncoder.encode(password);
+        try {
+            this.userMapper.updatePasswordByPhone(phone, encryptedPassword);
         } catch (Exception e){
             return false;
         }

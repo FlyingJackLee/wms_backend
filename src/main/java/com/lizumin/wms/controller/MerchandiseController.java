@@ -1,6 +1,7 @@
 package com.lizumin.wms.controller;
 
 import com.lizumin.wms.entity.ApiRes;
+import com.lizumin.wms.entity.MeCount;
 import com.lizumin.wms.entity.Merchandise;
 import com.lizumin.wms.entity.User;
 import com.lizumin.wms.service.MerchandiseService;
@@ -31,7 +32,7 @@ public class MerchandiseController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Map<String, Object>> getMerchandise(Authentication authentication,
+    public ResponseEntity<Map<String, Object>> getMerchandise(
                                                               @RequestParam @Nullable boolean sold,
                                                               @RequestParam int limit,
                                                               @RequestParam int offset) {
@@ -40,30 +41,28 @@ public class MerchandiseController {
             return ResponseEntity.badRequest().body(Map.of());
         }
 
-        int count  = this.merchandiseService.getMerchandiseCount(authentication, sold);
+        int count  = this.merchandiseService.getMerchandiseCount(sold);
         limit = limit > count ? count : limit;
 
 
         Map<String, Object> data = new HashMap<>(2);
         data.put("count", count);
-        data.put("merchandise", merchandiseService.getMerchandiseByPage(authentication, limit, offset));
+        data.put("merchandise", merchandiseService.getMerchandiseByPage(limit, offset));
 
         return ResponseEntity.ok(data);
     }
 
     @GetMapping("/cate")
-    public ResponseEntity<List<Merchandise>> getMerchandiseByCateId(Authentication authentication,
-                                                                    @RequestParam("cate_id") int cateId){
+    public ResponseEntity<List<Merchandise>> getMerchandiseByCateId(@RequestParam("cate_id") int cateId){
         if (cateId < 1) {
             return ResponseEntity.badRequest().body(List.of());
         }
 
-        return ResponseEntity.ok(this.merchandiseService.getMerchandiseByCateId(authentication, cateId));
+        return ResponseEntity.ok(this.merchandiseService.getMerchandiseByCateId(cateId));
     }
 
     @PostMapping("/")
-    public ResponseEntity<ApiRes> insertMerchandise(Authentication authentication,
-                                                    @RequestParam("cate_id") int cateId,
+    public ResponseEntity<ApiRes> insertMerchandise(@RequestParam("cate_id") int cateId,
                                                     @RequestParam("cost") double cost,
                                                     @RequestParam("price") double price,
                                                     @RequestParam("imei_list") List<String> imeiList,
@@ -74,13 +73,12 @@ public class MerchandiseController {
         }
         Date date = new Date(createTime);
 
-        this.merchandiseService.insertMerchandise(authentication, cateId, cost, price, imeiList, date);
+        this.merchandiseService.insertMerchandise(cateId, cost, price, imeiList, date);
         return ResponseEntity.ok(ApiRes.success());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiRes> updateMerchandise(Authentication authentication,
-                                                    @PathVariable int id,
+    public ResponseEntity<ApiRes> updateMerchandise(@PathVariable int id,
                                                     @RequestParam("cost") double cost,
                                                     @RequestParam("price") double price,
                                                     @RequestParam("imei") String imei){
@@ -88,24 +86,29 @@ public class MerchandiseController {
             return ResponseEntity.badRequest().body(ApiRes.fail());
         }
 
-        this.merchandiseService.updateMerchandise(authentication, id, cost, price, imei);
+        this.merchandiseService.updateMerchandise(id, cost, price, imei);
         return ResponseEntity.ok(ApiRes.success());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiRes> deleteMerchandise(Authentication authentication, @PathVariable int id){
+    public ResponseEntity<ApiRes> deleteMerchandise( @PathVariable int id){
         if (id < 1) {
             return ResponseEntity.badRequest().body(ApiRes.fail());
         }
-        this.merchandiseService.deleteMerchandise(authentication, id);
+        this.merchandiseService.deleteMerchandise(id);
         return ResponseEntity.ok(ApiRes.success());
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Merchandise>> search(Authentication authentication, @RequestParam("text") String text, @RequestParam @Nullable boolean sold) {
+    public ResponseEntity<List<Merchandise>> search( @RequestParam("text") String text, @RequestParam @Nullable boolean sold) {
         if (!Verify.isNotBlank(text)) {
             return ResponseEntity.badRequest().body(List.of());
         }
-        return ResponseEntity.ok(this.merchandiseService.searchMerchandise(authentication, text, sold));
+        return ResponseEntity.ok(this.merchandiseService.searchMerchandise(text, sold));
+    }
+
+    @GetMapping("/account")
+    public ResponseEntity<List<MeCount>> account() {
+        return ResponseEntity.ok(this.merchandiseService.accountMerchandises());
     }
 }

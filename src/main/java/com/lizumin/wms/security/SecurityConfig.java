@@ -1,13 +1,18 @@
 package com.lizumin.wms.security;
 
+import com.lizumin.wms.entity.SystemAuthority;
 import com.lizumin.wms.security.filter.JwtAuthenticationFilter;
 import com.lizumin.wms.security.filter.ParameterConvertFilter;
 import com.lizumin.wms.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,6 +32,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SecurityConfig {
     private final String[] WHITE_LIST = {"login/*", "/error", "/user/**", "/signup/**"};
 
@@ -47,6 +53,35 @@ public class SecurityConfig {
                 .addFilterAfter(usernamePasswordAuthenticationFilter, ParameterConvertFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter, ParameterConvertFilter.class);
         return http.build();
+    }
+
+    /**
+     * 用户权限层级设定
+     */
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        // ADMIN > OWNER
+        // OWNER> shopping， OWNER > inventory, OWNER> statistic
+        // 注意>符号两侧空格不可省略
+        String hierarchy = String.format("%s > %s %n %s > %s %n %s > %s %n %s > %s %n %s > %s %n %s > %s",
+                SystemAuthority.Role.ADMIN, SystemAuthority.Role.OWNER,
+                SystemAuthority.Role.ADMIN, SystemAuthority.Role.DEFAULT,
+                SystemAuthority.Role.OWNER, SystemAuthority.Role.STAFF,
+                SystemAuthority.Role.OWNER, SystemAuthority.Permission.SHOPPING,
+                SystemAuthority.Role.OWNER, SystemAuthority.Permission.INVENTORY,
+                SystemAuthority.Role.OWNER, SystemAuthority.Permission.STATISTICS
+        );
+
+        roleHierarchy.setHierarchy(hierarchy);
+        return roleHierarchy;
+    }
+
+    @Bean
+    static MethodSecurityExpressionHandler methodSecurityExpressionHandler(RoleHierarchy roleHierarchy) {
+        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
+        handler.setRoleHierarchy(roleHierarchy);
+        return handler;
     }
 
     @Bean
@@ -82,7 +117,7 @@ public class SecurityConfig {
         filter.setAuthenticationManager(authenticationManager);
         filter.setAllowSessionCreation(false);
         filter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/login/*", "POST"));
-        filter.setAuthenticationSuccessHandler(new JwtGeneratorAuthenticationSuccessHandler());
+        filter.setAuthenticationSuccessHandler(new LoginAuthenticationSuccessHandler());
         filter.setAuthenticationFailureHandler(new LoginAuthenticationFailureHandler());
         return filter;
     }
@@ -94,7 +129,7 @@ public class SecurityConfig {
      */
     @Bean
     public AuthenticationSuccessHandler tokenAuthenticationSuccessHandler() {
-        return new JwtGeneratorAuthenticationSuccessHandler();
+        return new LoginAuthenticationSuccessHandler();
     }
 
     /**

@@ -27,22 +27,22 @@ public class CategoryController {
 
     @GetMapping("/parent/{parentId}")
     public ResponseEntity<List<Category>> getCategoriesByParentId(Authentication authentication, @PathVariable int parentId) {
-        return ResponseEntity.ok(this.categoryService.getCategoriesByParentId(authentication ,parentId));
+        return ResponseEntity.ok(this.categoryService.getCategoriesByParentId(parentId));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategoryById(Authentication authentication, @PathVariable int id) {
-        return ResponseEntity.ok(this.categoryService.getCategory(authentication, id));
+        return ResponseEntity.ok(this.categoryService.getCategory(id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiRes> deleteCategoryById(Authentication authentication, @PathVariable int id) {
-        this.categoryService.deleteCategory(authentication, id);
+        this.categoryService.deleteCategory(id);
         return ResponseEntity.ok(ApiRes.success());
     }
 
     @PostMapping("/")
     public ResponseEntity<Integer> insertCategory(Authentication authentication, @RequestParam @NonNull int parentId, @RequestParam @NonNull String name) {
-        return ResponseEntity.ok(this.categoryService.insertCategory(authentication, parentId, name));
+        return ResponseEntity.ok(this.categoryService.insertCategory(parentId, name));
     }
 }

@@ -1,0 +1,86 @@
+pipeline {
+    // 请确保agent上配置了
+    // 1. docker
+    // 2. docker compose
+    // 3. jdk21
+    // 4. maven
+    // 5. git
+    agent{
+        label 'building'
+    }
+
+    parameters {
+        string(name:'BRANCH', defaultValue: 'main', description: 'which branch to build?')
+    }
+
+    options {
+        timeout(time: 15, unit: 'MINUTES')
+    }
+
+    tools{
+        maven 'M3'
+        jdk 'jdk21'
+    }
+
+    environment {
+        TZ = 'Asia/Shanghai'
+    }
+
+    stages {
+        stage('Preparation'){
+            steps {
+                git branch: "${params.BRANCH}", credentialsId: 'gitee', url: 'git@gitee.com:zuminli/wms_backend.git'
+            }
+        }
+
+        /*
+          构建阶段：
+              无论什么环境都应该使用这个步骤进行构建和测试
+              注意需要在构建机上安装docker和docker compose
+              具体请参考jenkins_install
+        */
+        stage('Building') {
+            environment {
+                JWT_PRIVATE_KEY_PATH = './deploy/test/private.pem'
+                JWT_PUBLIC_KEY_PATH = './deploy/test/public.pem'
+            }
+
+            steps {
+                // 构建测试用环境
+                dir('deploy/test') {
+                    // 生成测试用秘钥对
+                    sh "openssl genrsa -out private.pem"
+                    sh "openssl rsa -in private.pem -inform pem -pubout -out public.pem"
+
+                    // 先尝试卸载，再构建，防止容器冲突
+                    sh "docker compose down"
+
+                    sh "docker volume create wms_test_db_data"
+                    sh "docker compose up -d --build"
+                }
+
+                sh "mvn clean package -Dbuild.number=${BUILD_NUMBER} -Dbuild.env=beta"
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+
+            // 删除临时文件
+            post{
+                always {
+                    dir('deploy/test') {
+                        sh "rm *.pem"
+                        sh "docker compose down"
+                    }
+
+                    sh "docker volume rm wms_test_db_data"
+                    junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs cleanWhenFailure: false, cleanWhenNotBuilt: false, cleanWhenUnstable: false
+        }
+    }
+}

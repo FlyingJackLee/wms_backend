@@ -17,7 +17,7 @@ import java.util.Map;
  * Generate JWT when authentication success, and wrap into response
  *
  */
-public class JwtGeneratorAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         Assert.isInstanceOf(User.class, authentication.getPrincipal(), "Authenticated principal must be a UserDetails");

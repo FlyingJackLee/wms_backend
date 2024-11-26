@@ -1,5 +1,6 @@
 package com.lizumin.wms.dao;
 
+import com.lizumin.wms.entity.MeCount;
 import com.lizumin.wms.entity.Merchandise;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -129,17 +130,17 @@ public class MerchandiseMapperTest {
         // cate_id 错误
         Assertions.assertThrows(DataIntegrityViolationException.class, () ->
                 this.merchandiseMapper.insertMerchandise(9999, 999.00, 1500.00,
-                "00000000000000001", new Date(), 1));
+                "00000000000000001", new Date(), 1, 1));
 
         // owner_id 错误
         Assertions.assertThrows(DataIntegrityViolationException.class, () ->
                 this.merchandiseMapper.insertMerchandise(12, 999.00, 1500.00,
-                        "00000000000000001", new Date(), 999));
+                        "00000000000000001", new Date(), 999, 1));
 
         // imei重复 错误
         Assertions.assertThrows(DataIntegrityViolationException.class, () ->
                 this.merchandiseMapper.insertMerchandise(12, 999.00, 1500.00,
-                        "123456789000000", new Date(), 1));
+                        "123456789000000", new Date(), 1, 1));
     }
 
     /**
@@ -148,10 +149,12 @@ public class MerchandiseMapperTest {
     @Test
     public void should_create_me_and_get_its_id_when_inserting() {
         int id = this.merchandiseMapper.insertMerchandise(12, 999.00, 1500.00,
-                "00000000000000001", new Date(), 1);
+                "00000000000000001", new Date(), 2, 1);
         assertThat(id, greaterThan(2));
         assertThat(this.merchandiseMapper.getMerchandiseById(id, 1), notNullValue());
+        assertThat(this.merchandiseMapper.getMerchandiseById(id, 1).getImei(), is("00000000000000001"));
     }
+
 
     /**
      * updateSold测试
@@ -159,7 +162,7 @@ public class MerchandiseMapperTest {
     @Test
     public void should_update_sold_status_when_update_with_id() {
         int id = this.merchandiseMapper.insertMerchandise(12, 999.00, 1500.00,
-                "00000000000000002", new Date(), 1);
+                "00000000000000002", new Date(), 1, 1);
         assertThat(this.merchandiseMapper.getMerchandiseById(id, 1).isSold(), is(false));
 
         this.merchandiseMapper.updateSold(id, true, 1);
@@ -176,7 +179,7 @@ public class MerchandiseMapperTest {
     @Test
     public void should_delete_me_and_orders_when_delete() {
         int id = this.merchandiseMapper.insertMerchandise(12, 999.00, 1500.00,
-                "00000000000000033", new Date(), 1);
+                "00000000000000033", new Date(), 1, 1);
 
         this.merchandiseMapper.deleteMerchandise(id, 1);
         assertThat(this.merchandiseMapper.getMerchandiseById(id, 1), nullValue());
@@ -188,7 +191,7 @@ public class MerchandiseMapperTest {
     @Test
     public void should_update_me_when_update() {
         int id = this.merchandiseMapper.insertMerchandise(12, 999.00, 1500.00,
-                "00000000000000044", new Date(), 1);
+                "00000000000000044", new Date(), 1, 1);
         this.merchandiseMapper.updateMerchandise(id, 111, 1111, "9999", 1);
 
         Merchandise result = this.merchandiseMapper.getMerchandiseById(id, 1);
@@ -212,6 +215,22 @@ public class MerchandiseMapperTest {
         result.forEach(me -> {
             assertThat(me.isSold(), is(false));
         });
+    }
 
+    /**
+     * countMerchandiseByCateId测试
+     */
+    @Test
+    public void should_get_empty_or_count_when_account() {
+        // 已有数据测试
+        MeCount meCount = this.merchandiseMapper.countMerchandiseByCateId(11, false ,1);
+        assertThat(meCount, notNullValue());
+        assertThat(meCount.getCount(), greaterThanOrEqualTo(5));
+        assertThat(meCount.getSumCost(), greaterThanOrEqualTo(8750.00));
+        assertThat(meCount.getSumPrice(),greaterThanOrEqualTo(9995.00));
+
+        // 非法数据测试
+        meCount = this.merchandiseMapper.countMerchandiseByCateId(999, false , 999);
+        assertThat(meCount.getCount(), equalTo(0));
     }
 }

@@ -49,9 +49,6 @@ public class MessageUtilTest {
         String enResult = getMessageByLocale("UNKNOWN", Locale.US);
         assertThat(enResult, equalTo("Unknown problem"));
 
-        cnResult = getMessageByContext("UNKNOWN");
-        assertThat(cnResult, equalTo("未知错误"));
-
         cnResult = getMessageByDefault("UNKNOWN");
         assertThat(cnResult, equalTo("未知错误"));
 

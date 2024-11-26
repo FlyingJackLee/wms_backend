@@ -10,11 +10,13 @@
 	</parent>
 	<groupId>com.lizumin</groupId>
 	<artifactId>wms</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.2.22-rc.1</version>
 	<name>wms</name>
 	<description>wms</description>
 	<properties>
 		<java.version>21</java.version>
+		<build.number></build.number>
+		<build.env></build.env>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -90,8 +92,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.aliyun</groupId>
+			<artifactId>dysmsapi20170525</artifactId>
+			<version>2.0.24</version>
+		</dependency>
+
 	</dependencies>
 	<build>
+		<finalName>${artifactId}-${build.env}-${version}-${build.number}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
