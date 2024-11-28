@@ -1,0 +1,142 @@
+pipeline {
+    // 请确保agent上配置了
+    // 1. jdk21
+    agent{
+        label 'prod'
+    }
+
+    parameters {
+        string(name:'JAR_PATH', defaultValue: '/www/wwwroot/api.flyingjack.top/', description: 'jar包存放路径')
+    }
+
+    options {
+        timeout(time: 15, unit: 'MINUTES')
+    }
+
+    tools{
+        maven 'M3'
+        jdk 'jdk21'
+    }
+
+    environment {
+        TZ = 'Asia/Shanghai'
+    }
+
+    stages {
+        stage('Building and Test') {
+            agent{
+                label 'building'
+            }
+
+            environment {
+                JWT_PRIVATE_KEY_PATH = './deploy/test/private.pem'
+                JWT_PUBLIC_KEY_PATH = './deploy/test/public.pem'
+            }
+
+            steps {
+                git branch: "main", credentialsId: 'gitee', url: 'git@gitee.com:zuminli/wms_backend.git'
+
+                // 构建测试用环境
+                dir('deploy/test') {
+                    // 生成测试用秘钥对
+                    sh "openssl genrsa -out private.pem"
+                    sh "openssl rsa -in private.pem -inform pem -pubout -out public.pem"
+
+                    // 先尝试卸载，再构建，防止容器冲突
+                    sh "docker compose down"
+
+                    sh "docker volume create wms_test_db_data"
+                    sh "docker compose up -d --build"
+                }
+
+                sh "mvn clean package -Dbuild.number=${BUILD_NUMBER} -Dbuild.env=prod"
+
+                stash includes: 'target/*.jar', name: 'wmsPackage'
+            }
+
+            post{
+                always {
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+
+                    // 删除临时文件
+                    dir('deploy/test') {
+                        sh "rm *.pem"
+                        sh "docker compose down"
+                    }
+                    sh "docker volume rm wms_test_db_data"
+                    junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Preparation') {
+            steps {
+                git branch: "main", credentialsId: 'gitee', url: 'git@gitee.com:zuminli/wms_backend.git'
+
+                // 检查jdk
+                script {
+                    def checkCmd = sh(script: "which java", returnStatus: true)
+                    if (checkCmd != 0) {
+                        error "JDK 在目标机上不存在，终止运行"
+                    }
+                }
+
+                // 下载配置文件
+                dir('temp') {
+                    checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'codeup-read', url: 'git@codeup.aliyun.com:63a434c1aa32314b151eef46/wms/wms_configs.git']])
+                }
+
+                // 复制部署需要的文件
+                sh "mkdir -p deploy/prod"
+                sh "cp -f temp/prod/* deploy/prod/"
+
+                // 设置环境变量
+                script {
+                    dir('./deploy/prod') {
+                        sh "chmod +x setup.sh"
+                        def envsCheck = sh(script: "./setup.sh", returnStdout: true).trim()
+                        if (envsCheck == 1) {
+                            error "系统变量设置脚本不存在，终止运行"
+                        } else if (envsCheck == 2) {
+                            error "shell配置文件错误，终止运行"
+                        } else if (envsCheck == 3) {
+                            error "系统变量设置失败，终止运行"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps{
+                // 部署包
+                unstash 'wmsPackage'
+
+                script {
+                    def latestJar = sh(script: "ls -t target | head -n 1", returnStdout: true).trim()
+                    sh "mv -f 'target/${latestJar}' '${params.JAR_PATH}/wms_backend.jar'"
+
+                    // 停止运行现有项目
+                    sh(script: "pkill -f  'java.+wms'", returnStatus: true)
+
+                    echo "启动项目"
+                    dir('./deploy/prod') {
+                        sh 'chmod +x start.sh'
+                        def res = sh(script: "./start.sh ${params.JAR_PATH}", returnStatus: true)
+                        if (res == 0){
+                            echo "部署成功"
+                        } else {
+                            error "部署阶段发现错误，服务可能出现终止，请立刻介入"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs cleanWhenFailure: false, cleanWhenNotBuilt: false, cleanWhenUnstable: false
+        }
+    }
+}
