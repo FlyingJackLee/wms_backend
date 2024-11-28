@@ -34,7 +34,7 @@ pipeline {
             }
 
             steps {
-                git branch: "dev", credentialsId: 'gitee', url: 'git@gitee.com:zuminli/wms_backend.git'
+                git branch: "main", credentialsId: 'gitee', url: 'git@gitee.com:zuminli/wms_backend.git'
 
                 // 构建测试用环境
                 dir('deploy/test') {
@@ -69,8 +69,10 @@ pipeline {
             }
         }
 
-        stage('Environments Check') {
+        stage('Preparation') {
             steps {
+                git branch: "main", credentialsId: 'gitee', url: 'git@gitee.com:zuminli/wms_backend.git'
+
                 // 检查jdk
                 script {
                     def checkCmd = sh(script: "which java", returnStatus: true)
@@ -91,7 +93,7 @@ pipeline {
                 // 设置环境变量
                 script {
                     dir('./deploy/prod') {
-                        sh "chmod +x ./setup.sh"
+                        sh "chmod +x setup.sh"
                         def envsCheck = sh(script: "./setup.sh", returnStdout: true).trim()
                         if (envsCheck == 1) {
                             error "系统变量设置脚本不存在，终止运行"
