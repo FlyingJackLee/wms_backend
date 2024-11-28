@@ -95,3 +95,4 @@ $RECYCLE.BIN/
 *.pem
 *.env
 /src/main/resources/ssl/
+/deploy/prod/wms_envs.sh
